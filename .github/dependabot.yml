@@ -13,6 +13,10 @@ updates:
           - "react"
           - "react-dom"
           - "@types/react*"
+    # typescript-eslint 8 does not support TypeScript 7 yet.
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: deps
     labels:
