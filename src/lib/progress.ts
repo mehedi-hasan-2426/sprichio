@@ -69,6 +69,12 @@ const isObject = (x: unknown): x is Record<string, unknown> => typeof x === "obj
 const int = (x: unknown, min: number, max: number): x is number => typeof x === "number" && Number.isInteger(x) && x >= min && x <= max;
 const time = (x: unknown): x is number => int(x, 0, 8_640_000_000_000_000);
 
+function day(x: unknown): x is string {
+  if (typeof x !== "string" || !DAY.test(x)) return false;
+  const date = new Date(`${x}T00:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === x;
+}
+
 function record<T>(x: unknown, name: string, each: (v: unknown, key: string) => T, limit = 5000): Record<string, T> {
   if (!isObject(x)) fail(name + " must be an object");
   const keys = Object.keys(x);
@@ -101,14 +107,14 @@ export function validateProgress(x: unknown): Progress {
     return entry;
   });
   const cards = record(x.cards, "cards", (v, k) => {
-    if (!isObject(v) || !int(v.box, 1, 5) || typeof v.due !== "string" || !DAY.test(v.due) || !(v.learned === undefined || typeof v.learned === "boolean")) {
+    if (!isObject(v) || !int(v.box, 1, 5) || !day(v.due) || !(v.learned === undefined || typeof v.learned === "boolean")) {
       fail("cards." + k + " is invalid");
     }
     const card: CardState = { box: v.box as number, due: v.due as string };
     if (v.learned) card.learned = true;
     return card;
   });
-  if (!isObject(x.newCards) || typeof x.newCards.day !== "string" || !(x.newCards.day === "" || DAY.test(x.newCards.day)) || !int(x.newCards.count, 0, 1000)) {
+  if (!isObject(x.newCards) || !(x.newCards.day === "" || day(x.newCards.day)) || !int(x.newCards.count, 0, 1000)) {
     fail("newCards is invalid");
   }
   const writing = record(x.writing, "writing", (v, k) => {
@@ -123,7 +129,7 @@ export function validateProgress(x: unknown): Progress {
     if (!isObject(m) || !TAGS.includes(m.tag as Category) || !time(m.at)) fail("mistake entry is invalid");
     return { tag: m.tag as Category, at: m.at as number };
   });
-  if (!Array.isArray(x.days) || x.days.length > MAX_DAYS || !x.days.every((d) => typeof d === "string" && DAY.test(d))) fail("days is invalid");
+  if (!Array.isArray(x.days) || x.days.length > MAX_DAYS || !x.days.every(day)) fail("days is invalid");
   if (!isObject(x.settings) || typeof x.settings.english !== "boolean") fail("settings is invalid");
   const perDay = x.settings.newPerDay;
   if (perDay !== undefined && !(NEW_PER_DAY_OPTIONS as readonly unknown[]).includes(perDay)) fail("settings.newPerDay is invalid");
