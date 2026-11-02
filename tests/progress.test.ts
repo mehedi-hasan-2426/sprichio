@@ -11,6 +11,28 @@ test("round trip export and import", () => {
   assert.deepEqual(parseImport(JSON.stringify(p)), p);
 });
 
+test("progress rejects impossible calendar dates in every day field", () => {
+  for (const day of ["2026-02-29", "2026-04-31", "2026-00-10", "2026-13-01", "2026-01-00", "2026-01-32"]) {
+    const cards = { ...emptyProgress(), cards: { a: { box: 1, due: day } } };
+    const newCards = { ...emptyProgress(), newCards: { day, count: 1 } };
+    const days = { ...emptyProgress(), days: [day] };
+    for (const progress of [cards, newCards, days]) {
+      assert.throws(() => parseImport(JSON.stringify(progress)), Error, day);
+    }
+  }
+});
+
+test("progress preserves leap days, year boundaries and an unused new-card day", () => {
+  for (const day of ["2024-02-29", "2000-02-29", "2026-12-31", "2027-01-01"]) {
+    const progress = emptyProgress();
+    progress.cards.a = { box: 1, due: day };
+    progress.newCards = { day, count: 1 };
+    progress.days = [day];
+    assert.deepEqual(parseImport(JSON.stringify(progress)), progress);
+  }
+  assert.deepEqual(parseImport(JSON.stringify(emptyProgress())), emptyProgress());
+});
+
 test("submitted answers survive reload and legacy records still import", () => {
   const progress = recordAnswer(emptyProgress(), "w1-g1-4", { status: "new", attempts: 0, firstTry: null }, { status: "solved", attempts: 1, firstTry: true }, "VF", 1, ["Siehst", "fern"]);
   const restored = parseImport(JSON.stringify(progress));

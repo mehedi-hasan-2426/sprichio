@@ -106,6 +106,11 @@ already published in this public repository or copies from earlier deployments.
 
 ## Progress Storage
 
+Progress imports and cloud saves require real `YYYY-MM-DD` calendar dates for
+card due dates, study days and the new-card counter. Impossible dates such as
+`2026-02-29` are rejected rather than silently rolled into another month. Valid
+leap days and the empty day of an unused new-card counter remain supported.
+
 Create a Neon **Free** database through Vercel Marketplace and connect only the
 Production environment. Keep optional Neon Auth, Realtime and deployment branching
 off. Existing Google authentication remains the identity boundary. Check the actual
