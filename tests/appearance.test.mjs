@@ -6,6 +6,21 @@ import { runInNewContext } from "node:vm";
 const source = readFileSync(new globalThis.URL("../public/appearance.js", import.meta.url), "utf8");
 const key = "sprungbrett.appearance";
 
+test("app branding uses Sprichio and its transparent SVG favicon", () => {
+  for (const file of ["../src/components/Logo.tsx", "../pages/_app.tsx", "../pages/_document.tsx"]) {
+    const text = readFileSync(new globalThis.URL(file, import.meta.url), "utf8");
+    assert.match(text, /Sprichio/);
+    assert.doesNotMatch(text, /Sprungbrett/);
+  }
+  const document = readFileSync(new globalThis.URL("../pages/_document.tsx", import.meta.url), "utf8");
+  assert.match(document, /type="image\/svg\+xml" href="\/favicon\.svg"/);
+  assert.match(document, /https:\/\/sprichio\.de\/og-image\.jpg/);
+  const favicon = readFileSync(new globalThis.URL("../public/favicon.svg", import.meta.url), "utf8");
+  assert.match(favicon, /<title>Sprichio<\/title>/);
+  assert.equal((favicon.match(/<path\b/g) ?? []).length, 3);
+  assert.doesNotMatch(favicon, /<rect\b|<image\b|<script\b|background\s*:/);
+});
+
 function browser(initial, blocked = false) {
   const values = new Map(initial ? [[key, initial]] : []);
   values.set("sprungbrett.progress.synthetic", "unchanged progress");

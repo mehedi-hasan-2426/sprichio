@@ -1,8 +1,8 @@
 {
-  "name": "sprungbrett-deutsch",
+  "name": "sprichio",
   "version": "0.1.0",
   "private": true,
-  "description": "Sprungbrett: a privacy-first German A1 to A2 practice app with instant feedback",
+  "description": "Sprichio: a privacy-first German A2 practice app with instant feedback",
   "license": "MIT",
   "type": "module",
   "engines": {

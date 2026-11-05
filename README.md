@@ -1,11 +1,11 @@
-<p align="center"><img src="public/apple-touch-icon.png" width="96" alt="Sprungbrett logo" /></p>
+<p align="center"><img src="public/apple-touch-icon.png" width="96" alt="Sprichio logo" /></p>
 
-<h1 align="center">Sprungbrett</h1>
+<h1 align="center">Sprichio</h1>
 
 <p align="center">German practice for A2 learners. Every exercise checks your answer right away.<br />
-<a href="https://sprung.mehedihasanrahib.de">sprung.mehedihasanrahib.de</a></p>
+<a href="https://sprichio.de">sprichio.de</a></p>
 
-![Sprungbrett sign-in page with the Cologne skyline](public/og-image.jpg)
+![Sprichio's Cologne skyline background](public/og-image.jpg)
 
 ## What's inside
 

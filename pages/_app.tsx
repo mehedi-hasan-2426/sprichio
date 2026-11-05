@@ -16,7 +16,7 @@ function CourseApp({ Component, pageProps, router }: AppProps<PageProps>) {
   if (router.pathname === "/signin") return <Component {...pageProps} />;
   const accountKey = pageProps.guest ? "guest" : session?.accountKey;
   if (!accountKey || (!pageProps.guest && status !== "authenticated")) {
-    return <main className="signin"><h1>Sprungbrett</h1><p>{status === "loading" ? "Checking your session..." : "Your session has ended."}</p><Link href="/signin">Sign in</Link></main>;
+    return <main className="signin"><h1>Sprichio</h1><p>{status === "loading" ? "Checking your session..." : "Your session has ended."}</p><Link href="/signin">Sign in</Link></main>;
   }
   return (
     <CourseNavigation.Provider value={pageProps.courseNav ?? []}>

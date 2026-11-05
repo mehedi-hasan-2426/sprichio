@@ -42,7 +42,7 @@ export default function ProgressPage({ weeks, grammar }: Props) {
     const url = URL.createObjectURL(new Blob([JSON.stringify(progress, null, 2)], { type: "application/json" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = `sprungbrett-progress-${dayKey(new Date())}.json`;
+    a.download = `sprichio-progress-${dayKey(new Date())}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };

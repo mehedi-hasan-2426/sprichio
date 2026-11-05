@@ -38,7 +38,7 @@ export default function SignIn({ configured, denied }: { configured: boolean; de
   };
   return (
     <main className="signin-screen">
-      <Head><title>Sign in · Sprungbrett</title><meta name="robots" content="noindex" /></Head>
+      <Head><title>Sign in · Sprichio</title><meta name="robots" content="noindex" /></Head>
       <div className="signin-content">
         <p className="signin-brand"><Logo /></p>
         <div className="signin-hero">

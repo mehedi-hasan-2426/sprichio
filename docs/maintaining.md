@@ -1,4 +1,4 @@
-# Maintaining Sprungbrett
+# Maintaining Sprichio
 
 Notes for running, checking and deploying the app. The [README](../README.md) has the short version.
 
@@ -110,6 +110,30 @@ old copy is removed only after saving. Export before replacing account progress.
 Shared browser profiles can inspect local storage; use separate profiles when
 privacy between people using the same machine matters. Login does not erase source
 already published in this public repository or copies from earlier deployments.
+
+## Connect sprichio.de
+
+1. In the existing Vercel project, open **Settings -> Domains** and add
+   `sprichio.de` and `www.sprichio.de`. Redirect `www` to `sprichio.de`.
+2. In STRATO's DNS settings, enter the records Vercel shows for each hostname.
+   Use the displayed values rather than an old example IP or CNAME. Remove
+   conflicting records for those hostnames only; preserve mail records.
+3. Wait for Vercel to report valid DNS configuration and issue the HTTPS
+   certificate. No separate STRATO SSL package is needed for Vercel hosting.
+4. In the existing Google OAuth web client, add `https://sprichio.de` as an
+   authorized JavaScript origin and
+   `https://sprichio.de/api/auth/callback/google` as an authorized redirect URI.
+   Keep the old URI during the transition.
+5. Set `NEXTAUTH_URL=https://sprichio.de` in Vercel's **Production** environment,
+   then redeploy. Keep the existing Google client, session secret, approved
+   emails and Production database connection unchanged.
+6. Test guest entry and Google sign-in on the new hostname before redirecting
+   the old hostname. Account identity and cloud progress remain unchanged.
+   Browser-only progress is tied to its origin: export it on the old site and
+   import it on the new site before abandoning the old hostname.
+
+The application keeps its existing database table, cookie names, browser-storage
+keys and internal event names for compatibility. They are not visible branding.
 
 ## Progress Storage
 
