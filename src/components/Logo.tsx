@@ -12,7 +12,7 @@ export function Logo() {
   return (
     <span className="logo">
       <LogoMark />
-      <span className="logo-word">Sprungbrett</span>
+      <span className="logo-word">Sprichio</span>
     </span>
   );
 }

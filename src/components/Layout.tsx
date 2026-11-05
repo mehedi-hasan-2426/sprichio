@@ -76,13 +76,13 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
   return (
     <>
       <Head>
-        <title>{title ? `${title} · Sprungbrett` : "Sprungbrett · Deutsch lernen"}</title>
+        <title>{title ? `${title} · Sprichio` : "Sprichio · Deutsch lernen"}</title>
       </Head>
       <a className="skip" href="#main">
         Skip to content
       </a>
       <header className="top">
-        <Link href="/" className="brand" aria-label="Sprungbrett home">
+        <Link href="/" className="brand" aria-label="Sprichio home">
           <Logo />
         </Link>
         <nav aria-label="Main navigation">

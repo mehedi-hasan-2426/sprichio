@@ -25,7 +25,7 @@ Out of scope:
 
 ## Security properties
 
-Sprungbrett uses Next.js request-time rendering and NextAuth's Google provider.
+Sprichio uses Next.js request-time rendering and NextAuth's Google provider.
 Progress is stored in private Neon Postgres records. There is no analytics and no
 third-party browser scripts.
 Google handles sign-in; the application checks verified email against exactly two

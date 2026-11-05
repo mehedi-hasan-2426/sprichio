@@ -19,9 +19,41 @@ async function noHorizontalScroll(page: Page) {
 
 test("sign-in page renders particles and fits the screen", async ({ page }) => {
   await page.goto("/signin");
+  await expect(page).toHaveTitle("Sign in · Sprichio");
+  await expect(page.locator(".logo-word")).toHaveText("Sprichio");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Deutsch lernen.");
   await expect(page.locator("canvas.particles")).toBeAttached();
   await noHorizontalScroll(page);
+});
+
+test("Sprichio icons have transparent corners and visible pixels", async ({ page }) => {
+  await page.goto("/signin");
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute("href", "/favicon.svg");
+  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "Sprichio");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", "https://sprichio.de/og-image.jpg");
+  const icons = await page.evaluate(async () => {
+    const results = [];
+    for (const path of ["/favicon.svg", "/apple-touch-icon.png"]) {
+      const image = new Image();
+      image.src = path;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = 64;
+      canvas.height = 64;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas unavailable");
+      context.drawImage(image, 0, 0, 64, 64);
+      const pixels = context.getImageData(0, 0, 64, 64).data;
+      results.push({ path, cornerAlpha: pixels[3], visible: pixels.some((value, index) => index % 4 === 3 && value > 0) });
+    }
+    return results;
+  });
+  for (const icon of icons) {
+    expect(icon.cornerAlpha, icon.path).toBe(0);
+    expect(icon.visible, icon.path).toBe(true);
+  }
+  await noHorizontalScroll(page);
+  await page.screenshot({ path: test.info().outputPath("sprichio-signin.png"), fullPage: true });
 });
 
 test("particles stay off with reduced motion", async ({ page }) => {
@@ -33,6 +65,7 @@ test("particles stay off with reduced motion", async ({ page }) => {
 
 test("guest can open week 1 and gap fields keep their width while typing", async ({ page }) => {
   await enterAsGuest(page);
+  await expect(page.getByRole("link", { name: "Sprichio home" })).toBeVisible();
   await noHorizontalScroll(page);
   const links = await sectionLinks(page);
   await noHorizontalScroll(page);
