@@ -497,14 +497,7 @@ function emptyKey(): AnswerKey {
   return { numbered: new Map(), ordered: new Map(), models: [], notes: [], used: new Set() };
 }
 
-function parseCheckpoints(progressMd: string, keyMds: string[], issues: Issue[]): Checkpoint[] {
-  const models = new Map<number, string>();
-  for (const md of keyMds) {
-    for (const s of splitDoc(md).sections) {
-      const m = s.title.match(/^Checkpoint (\d) – Schreiben/);
-      if (m) models.set(Number(m[1]), parseAnswerKey(s.lines, s.title).models[0]?.text ?? "");
-    }
-  }
+function parseCheckpoints(progressMd: string, issues: Issue[]): Checkpoint[] {
   const out: Checkpoint[] = [];
   for (const s of splitDoc(progressMd).sections) {
     const m = s.title.match(/^Checkpoint (\d) \(Ende Woche (\d+)\)/);
@@ -514,13 +507,7 @@ function parseCheckpoints(progressMd: string, keyMds: string[], issues: Issue[])
     let k = 0;
     while (k < s.lines.length) {
       const t = (s.lines[k] ?? "").trim();
-      const range = t.match(/(\d+)–(\d+) Wörter/);
-      if (/^\*\*Teil 2: Neue Schreibaufgabe/.test(t) && range) {
-        if (!models.get(n)) issues.push({ where: `checkpoint ${n}`, message: "no model text" });
-        cp.writing = { id: `cp${n}-wr-1`, prompt: parseInline(t), min: Number(range[1]), max: Number(range[2]), model: models.get(n) ?? "" };
-      } else if (/^\*\*Teil 3: Neue Sprechaufgabe/.test(t)) {
-        cp.speaking = parseInline(t);
-      } else if (t.startsWith("| Ich kann")) {
+      if (t.startsWith("| Ich kann")) {
         const raw: string[] = [];
         while ((s.lines[k] ?? "").trim().startsWith("|")) raw.push(s.lines[k++] ?? "");
         cp.canDo = parseTable(raw).rows.map((r) => plain(r[0] ?? ""));
@@ -584,7 +571,7 @@ export function parseCourse(src: SourceFiles): { course: Course; issues: Issue[]
     if (vocabSection) vocab.push(...parseVocab(n, vocabSection.lines));
   });
 
-  const checkpoints = parseCheckpoints(src.progress, src.weekKeys, issues);
+  const checkpoints = parseCheckpoints(src.progress, issues);
   const docs = Object.entries(src.docs).map(([slugName, md]) => parseDoc(slugName, md));
   return { course: { placement, weeks, vocab, checkpoints, docs, rubric: parseRubric(src.portfolio) }, issues };
 }

@@ -99,12 +99,50 @@ export interface Unit {
   shortDay: Inline[];
 }
 
+export interface ExamPassage {
+  title: string;
+  paragraphs: string[];
+}
+
+export interface ExamReadingPart {
+  title: string;
+  instruction: string;
+  instructionEn: string;
+  passages: ExamPassage[];
+  itemIds: string[];
+  stretch?: boolean;
+}
+
+export interface ExamSpeakingPart {
+  title: string;
+  instruction: string;
+  instructionEn: string;
+  cards: string[];
+  table?: { header: string[]; rows: string[][] };
+  model?: string[];
+}
+
+export interface CheckpointExam {
+  topics: number[];
+  reading: ExamReadingPart[];
+  form: {
+    title: string;
+    instruction: string;
+    instructionEn: string;
+    source: ExamPassage;
+    fields: { label: string; value?: string; itemId?: string }[];
+  };
+  letter: { task: WritingTask; points: string[]; instructionEn: string };
+  speaking: ExamSpeakingPart[];
+  speakingKey: string;
+}
+
 export interface Checkpoint {
   n: number;
   week: number;
-  writing?: WritingTask;
-  speaking?: Inline[];
   canDo: string[];
+  exam?: CheckpointExam;
+  items?: Record<string, Item>;
 }
 
 export interface Doc {

@@ -21,7 +21,7 @@ const weeks: Addition[] = [
       ["vor·bereiten", "bereitet vor · hat vorbereitet", "to prepare", "Ich bereite meine Tasche vor.", "I prepare my bag."],
       ["pünktlich", "adjective/adverb", "on time; punctual", "Der Kurs beginnt pünktlich.", "The course starts on time."],
     ],
-    message: "Hallo Alex, unser Deutschkurs beginnt morgen schon um 8 Uhr, nicht um 9 Uhr. Bitte bring dein Heft mit. Nach dem Kurs können wir zusammen frühstücken. Ich warte um 7.50 Uhr vor der Schule. Viele Grüße, Mira",
+    message: "Hallo Alex, ich habe eine wichtige Information für dich. Unser Deutschkurs beginnt morgen schon um 8 Uhr, nicht wie immer um 9 Uhr. Die Lehrerin hat am Vormittag einen Termin. Am Mittwoch und am Donnerstag beginnt der Kurs dann wieder um 9 Uhr. Bitte bring morgen dein Heft mit, das Buch brauchen wir nicht. Nach dem Kurs habe ich bis 11 Uhr Zeit. Wir können dann zusammen frühstücken, das Café am Markt öffnet um 10 Uhr. Ich warte morgen um 7.50 Uhr vor der Schule, nicht vor dem Café wie letzte Woche. Bis morgen und viele Grüße, Mira",
     responses: [
       ["Wann und wo wartet Mira? Antworte in einem Satz.", "Mira wartet um 7.50 Uhr vor der Schule."],
       ["Du kannst erst um 8.15 Uhr kommen. Schreibe Mira eine kurze Nachricht mit einer Entschuldigung.", "Hallo Mira, entschuldige bitte, ich kann erst um 8.15 Uhr kommen. Warte bitte nicht auf mich."],
@@ -41,7 +41,7 @@ const weeks: Addition[] = [
       ["zurück·geben", "gibt zurück · hat zurückgegeben", "to return something; to give back", "Ich gebe die leeren Flaschen zurück.", "I return the empty bottles."],
       ["günstig", "adjective/adverb", "inexpensive; good value here", "Die Tomaten sind heute günstig.", "The tomatoes are good value today."],
     ],
-    message: "Markt am Rathaus: Am Mittwoch verkaufen wir von 8 bis 13 Uhr frisches Obst und Gemüse. Drei Kilo Kartoffeln kosten vier Euro. Bitte bringen Sie eigene Taschen mit. Kartenzahlung ist leider nicht möglich.",
+    message: "Markt am Rathaus: Am Mittwoch verkaufen wir von 8 bis 13 Uhr frisches Obst und Gemüse aus der Region. Der Stand von Familie Huber mit Käse und Eiern ist schon ab 7 Uhr da. Diese Woche im Angebot: Drei Kilo Kartoffeln kosten vier Euro, ein Kilo Tomaten kostet 2,50 Euro. Die Bäckerei Korn verkauft bis 12 Uhr frisches Brot, danach ist ihr Stand geschlossen. Bitte bringen Sie eigene Taschen mit, wir haben keine Plastiktüten mehr. Kartenzahlung ist leider nicht möglich. Einen Geldautomaten finden Sie in der Bank neben dem Rathaus. Ihr Marktteam",
     responses: [
       ["Wann endet der Markt und wie können Sie bezahlen?", "Der Markt endet um 13 Uhr. Man kann nur bar bezahlen."],
       ["Sie möchten drei Kilo Kartoffeln kaufen. Schreiben Sie zwei Fragen an die Verkäuferin: zum Preis und zur Tasche.", "Was kosten drei Kilo Kartoffeln? Haben Sie auch eine Tasche für mich?"],
@@ -61,7 +61,7 @@ const weeks: Addition[] = [
       ["ein·ziehen", "zieht ein · ist eingezogen", "to move in", "Wir ziehen nächste Woche ein.", "We move in next week."],
       ["gemütlich", "adjective/adverb", "cosy; comfortable", "Das Wohnzimmer ist gemütlich.", "The living room is cosy."],
     ],
-    message: "Liebe Mieterinnen und Mieter, am Donnerstag ist das Wasser von 9 bis 12 Uhr abgestellt. Wir reparieren eine Leitung im Keller. Bitte füllen Sie vorher Wasser in Flaschen. Bei Fragen rufen Sie das Büro an. Ihre Hausverwaltung",
+    message: "Liebe Mieterinnen und Mieter, am Donnerstag ist das Wasser in Haus A und Haus B von 9 bis 12 Uhr abgestellt. Wir reparieren eine Leitung im Keller. In Haus C gibt es am Donnerstag ganz normal Wasser. Bitte füllen Sie vorher Wasser in Flaschen und benutzen Sie in dieser Zeit die Waschmaschine nicht. Ab 12 Uhr ist das Wasser am Anfang vielleicht etwas braun. Lassen Sie es dann bitte zwei Minuten laufen. Der Hausmeister ist am Donnerstag ab 8 Uhr im Keller und hilft Ihnen gern. Bei Fragen rufen Sie das Büro an, Montag bis Freitag von 8 bis 16 Uhr. Ihre Hausverwaltung",
     responses: [
       ["Warum gibt es am Donnerstag zeitweise kein Wasser?", "Eine Leitung im Keller wird repariert."],
       ["Ihre Nachbarin ist nicht zu Hause. Schreiben Sie ihr, wann es kein Wasser gibt und was sie vorher tun soll.", "Am Donnerstag gibt es von 9 bis 12 Uhr kein Wasser. Fülle bitte vorher Wasser in Flaschen."],
@@ -81,7 +81,7 @@ const weeks: Addition[] = [
       ["erleben", "erlebt · hat erlebt", "to experience", "Wir haben viel zusammen erlebt.", "We have experienced a lot together."],
       ["unterwegs", "adverb", "on the way; out and about", "Wir waren den ganzen Tag unterwegs.", "We were out and about all day."],
     ],
-    message: "Hallo Ben, gestern waren wir am See. Zuerst sind wir eine Stunde gewandert. Dann hat es geregnet und wir sind ins kleine Museum gegangen. Die Eintrittskarte hat sechs Euro gekostet. Abends haben wir zu Hause gekocht. Wie war dein Wochenende? Anna",
+    message: "Hallo Ben, gestern waren wir am See. Wir sind schon um 8 Uhr mit dem Zug losgefahren. Am Vormittag war das Wetter noch schön. Zuerst sind wir eine Stunde gewandert. Mein Bruder ist danach nicht geschwommen, das Wasser war zu kalt. Dann hat es geregnet und wir sind ins kleine Museum gegangen. Die Eintrittskarte hat sechs Euro gekostet, für Kinder nur drei Euro. Am Nachmittag hat die Sonne wieder geschienen. Wir haben im Café Kuchen gegessen und viele Fotos gemacht. Abends haben wir zu Hause gekocht. Wie war dein Wochenende? Anna",
     responses: [
       ["Was hat Anna nach der Wanderung gemacht und warum?", "Sie ist ins Museum gegangen, weil es geregnet hat."],
       ["Beantworten Sie Annas Frage mit zwei Sätzen im Perfekt über Ihr Wochenende.", "Ich habe meine Schwester besucht. Danach haben wir zusammen einen Film gesehen."],
@@ -101,7 +101,7 @@ const weeks: Addition[] = [
       ["sich erholen", "erholt sich · hat sich erholt", "to recover; to recuperate", "Ich erhole mich zu Hause.", "I am recovering at home."],
       ["gesund", "adjective/adverb", "healthy; well", "Ich bin wieder gesund.", "I am well again."],
     ],
-    message: "Praxis Sommer: Ihr Termin am Dienstag um 10 Uhr muss leider ausfallen. Wir bieten Ihnen Mittwoch um 11 Uhr oder Donnerstag um 15 Uhr an. Bitte bestätigen Sie einen Termin telefonisch. Bringen Sie Ihre Gesundheitskarte und Ihre Medikamentenliste mit.",
+    message: "Praxis Sommer: Liebe Patientin, lieber Patient, Ihr Termin am Dienstag um 10 Uhr muss leider ausfallen, denn Frau Dr. Sommer ist krank. Wir bieten Ihnen Mittwoch um 11 Uhr oder Donnerstag um 15 Uhr an. Der Termin am Freitag um 9 Uhr ist leider schon weg. Bitte bestätigen Sie einen Termin telefonisch, nicht per E-Mail. Bringen Sie Ihre Gesundheitskarte und Ihre Medikamentenliste mit. Ihre alten Untersuchungsergebnisse haben wir schon. Bitte kommen Sie zehn Minuten vor dem Termin. Haben Sie starke Schmerzen? Dann kommen Sie bitte in die offene Sprechstunde, jeden Tag von 8 bis 9 Uhr. Ihr Praxisteam",
     responses: [
       ["Welche zwei neuen Termine bietet die Praxis an?", "Die Praxis bietet Mittwoch um 11 Uhr oder Donnerstag um 15 Uhr an."],
       ["Sie wählen Donnerstag. Formulieren Sie eine kurze telefonische Bestätigung.", "Guten Tag, hier spricht Alex. Ich bestätige den Termin am Donnerstag um 15 Uhr."],
@@ -121,7 +121,7 @@ const weeks: Addition[] = [
       ["vorbei·gehen", "geht vorbei · ist vorbeigegangen", "to walk past", "Gehen Sie an der Schule vorbei.", "Walk past the school."],
       ["gegenüber", "preposition/adverb; with dative", "opposite; across from", "Die Post ist gegenüber der Bank.", "The post office is opposite the bank."],
     ],
-    message: "Die Haltestelle Markt ist bis Freitag wegen einer Baustelle gesperrt. Bus 12 hält jetzt vor der Bibliothek. Vom Markt gehen Sie geradeaus bis zur Ampel und dann links. Nach hundert Metern sehen Sie die Bibliothek auf der rechten Seite.",
+    message: "Information der Stadtwerke: Die Haltestelle Markt ist bis Freitag wegen einer Baustelle gesperrt. Bus 12 hält in dieser Zeit vor der Bibliothek. Bus 7 fährt ganz normal und hält weiter am Bahnhof. Vom Markt gehen Sie geradeaus bis zur Ampel und dann links. Nach hundert Metern sehen Sie die Bibliothek auf der rechten Seite. Bitte gehen Sie nicht durch die Fußgängerzone, dort ist auch eine Baustelle. Ab Samstag hält Bus 12 wieder am Markt. Am Samstag und am Sonntag fährt Bus 12 nur jede halbe Stunde. Wir entschuldigen uns für die Probleme. Ihre Stadtwerke",
     responses: [
       ["Warum hält Bus 12 nicht am Markt und wo hält er jetzt?", "Wegen einer Baustelle hält er nicht am Markt. Er hält vor der Bibliothek."],
       ["Ihr Freund steht am Markt. Beschreiben Sie ihm den Weg zur neuen Haltestelle in zwei Sätzen.", "Geh geradeaus bis zur Ampel und dann links. Nach hundert Metern ist die Bibliothek rechts."],
@@ -141,7 +141,7 @@ const weeks: Addition[] = [
       ["vereinbaren", "vereinbart · hat vereinbart", "to arrange; to agree on", "Wir vereinbaren einen Termin.", "We arrange an appointment."],
       ["zuverlässig", "adjective/adverb", "reliable", "Meine Kollegin ist sehr zuverlässig.", "My colleague is very reliable."],
     ],
-    message: "Hallo Team, die Besprechung am Freitag beginnt schon um 9 Uhr in Raum 4. Bitte bringt eure Wochenpläne mit. Wer im Homeoffice arbeitet, kann online teilnehmen. Schickt eure Fragen bitte bis Donnerstag an Frau Wolf. Danke, Karim",
+    message: "Hallo Team, die Besprechung am Freitag beginnt schon um 9 Uhr, nicht um 10 Uhr. Sie ist in Raum 4, denn Raum 2 ist am Freitag besetzt. Bitte bringt eure Wochenpläne mit. Wer im Homeoffice arbeitet, kann online teilnehmen. Den Link schickt Frau Wolf am Donnerstagabend. Schickt eure Fragen bitte bis Donnerstag um 12 Uhr an Frau Wolf, nicht an mich. Sie leitet die Besprechung, denn ich bin ab Donnerstag nicht im Büro. Nach der Besprechung gibt es Kaffee und Kuchen in der Küche. Bitte seid pünktlich, wir haben viele Themen. Danke, Karim",
     responses: [
       ["Wann und wo findet die Besprechung statt?", "Sie findet am Freitag um 9 Uhr in Raum 4 statt."],
       ["Sie arbeiten am Freitag zu Hause. Schreiben Sie Karim, wie Sie teilnehmen und was Sie vorbereiten.", "Hallo Karim, ich nehme online teil. Ich bereite meinen Wochenplan vor und schicke meine Fragen bis Donnerstag."],
@@ -161,7 +161,7 @@ const weeks: Addition[] = [
       ["aus·wählen", "wählt aus · hat ausgewählt", "to choose; to select", "Ich wähle den grünen Schal aus.", "I choose the green scarf."],
       ["bequem", "adjective/adverb", "comfortable", "Diese Schuhe sind bequem.", "These shoes are comfortable."],
     ],
-    message: "Liebe Kundin, Ihre bestellte Jacke ist da. Sie können sie bis Samstag abholen und im Geschäft anprobieren. Bitte bringen Sie Ihre Bestellnummer mit. Am Samstag schließen wir bereits um 16 Uhr. Ihr Modehaus am Park",
+    message: "Liebe Kundin, Ihre bestellte Jacke in Größe 38 ist da. Leider haben wir die Farbe Dunkelblau nicht mehr bekommen, die Jacke ist grau. Sie können die Jacke bis Samstag abholen und im Geschäft anprobieren. Die Jacke passt nicht? Oder die Farbe gefällt Ihnen nicht? Dann müssen Sie sie nicht kaufen. Bitte bringen Sie Ihre Bestellnummer mit, einen Kassenbon brauchen Sie nicht. Von Montag bis Freitag sind wir von 10 bis 19 Uhr für Sie da. Am Samstag schließen wir aber bereits um 16 Uhr. Wir freuen uns auf Ihren Besuch. Ihr Modehaus am Park",
     responses: [
       ["Bis wann können Sie die Jacke abholen und was brauchen Sie dafür?", "Ich kann sie bis Samstag abholen und brauche meine Bestellnummer."],
       ["Sie können erst Samstag um 17 Uhr kommen. Schreiben Sie dem Geschäft und bitten Sie um eine andere Möglichkeit.", "Guten Tag, ich kann erst am Samstag um 17 Uhr kommen. Kann ich die Jacke am Montag abholen?"],
@@ -181,7 +181,7 @@ const weeks: Addition[] = [
       ["mit·bringen", "bringt mit · hat mitgebracht", "to bring along", "Soll ich etwas mitbringen?", "Should I bring anything?"],
       ["gemeinsam", "adjective/adverb", "together; shared", "Wir planen gemeinsam ein Fest.", "We plan a celebration together."],
     ],
-    message: "Hallo zusammen, wegen des Regens feiern wir meinen Geburtstag nicht im Park, sondern bei mir zu Hause. Die Adresse ist Gartenstraße 8. Es geht am Samstag um 18 Uhr los. Bringt bitte etwas zu trinken mit und sagt mir bis Freitag Bescheid. Lea",
+    message: "Hallo zusammen, wegen des Regens feiern wir meinen Geburtstag nicht im Park, sondern bei mir zu Hause. Die Adresse ist Gartenstraße 8, dritter Stock, mein Name steht an der Klingel. Es geht am Samstag um 18 Uhr los, nicht um 16 Uhr. Das Grillen im Park machen wir dann nächsten Monat. Bringt bitte etwas zu trinken mit, das Essen mache ich. Meine Wohnung ist klein, also kommt bitte ohne Hunde. Sagt mir bitte bis Freitag Bescheid. Ihr könnt gern bis Mitternacht bleiben. Ich freue mich schon sehr auf euch und auf einen schönen Abend! Lea",
     responses: [
       ["Wo findet die Feier jetzt statt und warum?", "Die Feier findet bei Lea zu Hause statt, weil es regnet."],
       ["Sagen Sie zu und fragen Sie, ob Sie einen Freund mitbringen dürfen.", "Hallo Lea, ich komme gern am Samstag. Darf ich einen Freund mitbringen?"],
@@ -201,7 +201,7 @@ const weeks: Addition[] = [
       ["sich verspäten", "verspätet sich · hat sich verspätet", "to be late; to be delayed", "Unser Zug verspätet sich.", "Our train is delayed."],
       ["direkt", "adjective/adverb", "direct; directly", "Der Bus fährt direkt zum Flughafen.", "The bus goes directly to the airport."],
     ],
-    message: "Sehr geehrter Herr Weber, Ihr Zimmer ist am Freitag ab 15 Uhr frei. Wenn Sie nach 20 Uhr ankommen, rufen Sie uns bitte vorher an. Frühstück gibt es von 7 bis 10 Uhr. Der Parkplatz kostet fünf Euro pro Nacht. Ihre Pension Adler",
+    message: "Sehr geehrter Herr Weber, vielen Dank für Ihre Buchung. Ihr Zimmer ist am Freitag ab 15 Uhr frei. Am Samstag und am Sonntag sind unsere Zimmer schon ab 13 Uhr frei, aber Sie kommen ja am Freitag. Wenn Sie nach 20 Uhr ankommen, rufen Sie uns bitte vorher an. Unsere Rezeption ist dann nicht mehr besetzt. Frühstück gibt es von 7 bis 10 Uhr im Wintergarten. Der Parkplatz kostet fünf Euro pro Nacht, die Garage zehn Euro pro Nacht. Hunde sind bei uns leider nicht erlaubt. Wir wünschen Ihnen eine gute Reise. Ihre Pension Adler",
     responses: [
       ["Ab wann ist das Zimmer frei und wann gibt es Frühstück?", "Das Zimmer ist ab 15 Uhr frei. Frühstück gibt es von 7 bis 10 Uhr."],
       ["Ihr Zug kommt erst um 21 Uhr an. Schreiben Sie eine kurze Nachricht an die Pension.", "Guten Tag, mein Zug kommt erst um 21 Uhr an. Wie bekomme ich dann meinen Zimmerschlüssel?"],
@@ -221,7 +221,7 @@ const weeks: Addition[] = [
       ["überweisen", "überweist · hat überwiesen", "to transfer money", "Ich überweise die Miete jeden Monat.", "I transfer the rent every month."],
       ["gültig", "adjective/adverb", "valid", "Mein Ausweis ist noch gültig.", "My ID is still valid."],
     ],
-    message: "Ihr Termin im Bürgeramt ist am Montag um 10.30 Uhr. Bringen Sie bitte Ihren Ausweis, das ausgefüllte Formular und eine Kopie Ihres Mietvertrags mit. Bitte kommen Sie zehn Minuten früher. Wenn Sie verhindert sind, sagen Sie den Termin online ab.",
+    message: "Ihr Termin im Bürgeramt ist am Montag um 10.30 Uhr in Zimmer 12. Bringen Sie bitte Ihren Ausweis, das ausgefüllte Formular und eine Kopie Ihres Mietvertrags mit. Den Mietvertrag selbst brauchen wir nicht. Ein Foto ist für diesen Termin nicht nötig. Die Gebühr von 12 Euro bezahlen Sie bar oder mit Karte. Bitte kommen Sie zehn Minuten früher. Sie müssen am Eingang keine Wartenummer ziehen, denn Sie haben schon einen Termin. Wenn Sie verhindert sind, sagen Sie den Termin bitte online ab. Ohne Absage müssen Sie auf den nächsten Termin oft vier Wochen warten.",
     responses: [
       ["Wann sollen Sie im Bürgeramt sein und welche Unterlagen brauchen Sie?", "Ich soll um 10.20 Uhr dort sein und meinen Ausweis, das Formular und eine Kopie meines Mietvertrags mitbringen."],
       ["Sie sind am Montag krank. Schreiben Sie eine kurze Bitte um einen neuen Termin.", "Guten Tag, leider bin ich am Montag krank. Kann ich bitte einen neuen Termin bekommen?"],
@@ -241,7 +241,7 @@ const weeks: Addition[] = [
       ["vergleichen", "vergleicht · hat verglichen", "to compare", "Wir vergleichen unsere Antworten.", "We compare our answers."],
       ["selbstständig", "adjective/adverb", "independent; independently", "Ich kann die Aufgabe selbstständig lösen.", "I can solve the task independently."],
     ],
-    message: "Liebe Kursteilnehmende, unser Übungstest findet am Freitag von 9 bis 11 Uhr in Raum 6 statt. Bitte seid um 8.45 Uhr da und bringt einen Stift mit. Handys bleiben in der Tasche. Nach dem Test besprechen wir die Lösungen gemeinsam. Der Test ist nur zur Übung und kein offizielles Zertifikat.",
+    message: "Liebe Kursteilnehmende, unser Übungstest findet am Freitag von 9 bis 11 Uhr in Raum 6 statt, nicht in unserem normalen Kursraum. Bitte seid um 8.45 Uhr da und bringt einen Stift mit. Papier bekommt ihr von uns, Wörterbücher braucht ihr nicht. Handys bleiben in der Tasche. Bitte esst vorher etwas, der Test dauert zwei Stunden. Zuerst machen wir Lesen und Schreiben, dann Hören. Den Sprechteil üben wir nächste Woche zu zweit. Nach dem Test besprechen wir die Lösungen gemeinsam, das dauert etwa eine halbe Stunde. Der Test ist nur zur Übung und kein offizielles Zertifikat. Viele Grüße, eure Kursleitung",
     responses: [
       ["Wann sollen die Teilnehmenden da sein und was müssen sie mitbringen?", "Sie sollen um 8.45 Uhr da sein und einen Stift mitbringen."],
       ["Ein Freund fragt, ob er nach dem Test ein offizielles Zertifikat bekommt. Antworten Sie mit Informationen aus dem Text.", "Nein, dieser Test ist nur zur Übung. Du bekommst kein offizielles Zertifikat."],
@@ -249,6 +249,8 @@ const weeks: Addition[] = [
     ],
   },
 ];
+
+export const PRACTICE_MESSAGES: readonly string[] = weeks.map((addition) => addition.message);
 
 export function addWeeklyPractice(course: Course): Course {
   for (const [index, addition] of weeks.entries()) {

@@ -10,6 +10,8 @@ import { addRecallPractice } from "../src/content/recall.ts";
 import { addWritingPractice } from "../src/content/writing.ts";
 import { addGrammarPractice } from "../src/content/grammar.ts";
 import { makeSelfPaced } from "../src/content/self-paced.ts";
+import { applyReadings } from "../src/content/reading.ts";
+import { addCheckpointExams } from "../src/content/checkpoint-exams.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "content", "source");
@@ -34,6 +36,7 @@ const { course, issues } = parseCourse({
   },
 });
 
+applyReadings(course);
 const all = [...issues, ...validateCourse(course)];
 const itemCount = [course.placement, ...course.weeks].reduce((sum, u) => sum + Object.keys(u.items).length, 0);
 
@@ -59,6 +62,7 @@ addRecallPractice(english);
 addWritingPractice(english);
 makeSelfPaced(english);
 addGrammarPractice(english);
+addCheckpointExams(english);
 for (const entry of english.vocab) {
   if (!entry.meaning?.trim() || !entry.exampleEn?.trim() || !entry.example.trim() || !entry.forms.trim()) {
     throw new Error(`Incomplete bilingual vocabulary: ${entry.id}`);
