@@ -56,6 +56,16 @@ The full list of checks, the content pipeline and the deployment notes are in
 Next.js (Pages Router), React, NextAuth, Neon Postgres and plain CSS. Animations are
 CSS only and switch to short fades when the device asks for reduced motion.
 
+## Dependency updates
+
+[Renovate](renovate.json) requires the [GitHub App](https://github.com/apps/renovate)
+to be installed for this repository. It replaces Dependabot version updates and its
+auto-merge workflow, not vulnerability alerts or existing security scans. Routine
+updates are grouped by manager before 06:00 Monday, Europe/Berlin, with a three-day
+release-age delay. Vulnerability PRs bypass that delay and schedule. All updates
+need manual review and passing checks; major upgrades first need Dashboard approval.
+The existing TypeScript 6 compatibility ceiling is preserved.
+
 ## Licence
 
 Code: MIT ([LICENSE](LICENSE)). Course content: all rights reserved ([NOTICE](NOTICE)).
