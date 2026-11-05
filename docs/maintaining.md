@@ -41,9 +41,16 @@ node scripts/test-server.mjs # production-route tests with synthetic sessions
 5. `src/content/feedback-hints.ts` holds hints and one-line rules per exercise group;
    `src/content/overrides.ts` holds the few answers that cannot be derived mechanically.
 6. `src/content/vocabulary.ts` and `src/content/enrichment.ts` own bilingual glosses
-   and original additions. These survive re-syncing the source notes. Original
-   IDs are preserved and schema-v1 progress exports still import. New reading
-   responses are self-assessed, not falsely exact-match graded.
+   and original additions. These survive re-syncing the source notes. Unchanged
+   exercise IDs are preserved and schema-v1 progress exports still import.
+   Extra reading responses are self-assessed, not exact-match graded.
+7. `src/content/reading.ts` replaces the twelve topic readings before translation.
+   Changed questions use `wN-lesen-v2-K` IDs so older answers do not mark the new
+   questions complete. `src/content/checkpoint-exams.ts` adds independent reading,
+   writing and speaking tasks for topics 1-4, 5-8 and 9-12 after translation.
+   Old checkpoint scores stay in saved progress but do not grade the new tasks.
+   These are original telc-aligned practice tasks, not complete official mock
+   exams; the longer checkpoint texts are labelled A2 stretch practice.
 
 The [learning references](learning-sources.md) record sources used for the
 initial enrichment. Additional practice links are available inside grammar topics.

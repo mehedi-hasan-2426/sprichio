@@ -40,8 +40,6 @@ for (const u of [course.placement, ...course.weeks]) {
   add(u.id + ":short", plain(u.shortDay));
 }
 for (const cp of course.checkpoints) {
-  if (cp.writing) add(`cp${cp.n}:writing`, plain(cp.writing.prompt));
-  if (cp.speaking) add(`cp${cp.n}:speaking`, plain(cp.speaking));
   cp.canDo.forEach((c) => add(`cp${cp.n}:cando`, c));
 }
 course.rubric.writing.forEach((c) => add("rubric", c));

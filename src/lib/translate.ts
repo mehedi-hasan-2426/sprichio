@@ -84,12 +84,7 @@ export function translateCourse(course: Course, en: Record<string, string>): { c
     ...course,
     placement: unit(course.placement),
     weeks: course.weeks.map(unit),
-    checkpoints: course.checkpoints.map((cp) => {
-      const next = { ...cp, canDo: cp.canDo.map((c) => str(c)) };
-      if (cp.writing) next.writing = cp.writing;
-      if (cp.speaking) next.speaking = segs(cp.speaking);
-      return next;
-    }),
+    checkpoints: course.checkpoints.map((cp) => ({ ...cp, canDo: cp.canDo.map((c) => str(c)) })),
     docs: course.docs.map((d) => ({ ...d, title: str(d.title), blocks: blocks(d.blocks) })),
     rubric: { writing: course.rubric.writing.map((c) => str(c)), checklist: course.rubric.checklist.map((c) => str(c)) },
   };

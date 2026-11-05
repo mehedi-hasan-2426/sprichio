@@ -1,116 +1,211 @@
 import Link from "next/link";
 import { protect } from "../../src/server/protect.ts";
-import type { Checkpoint, WritingTask as Task } from "../../src/lib/types.ts";
+import type { Checkpoint, CheckpointExam, ExamPassage, Item } from "../../src/lib/types.ts";
 import { Layout } from "../../src/components/Layout.tsx";
-import { InlineText } from "../../src/components/Blocks.tsx";
+import { ItemView } from "../../src/components/ItemView.tsx";
 import { Recorder } from "../../src/components/Recorder.tsx";
 import { Rubric, SPEAKING_CRITERIA } from "../../src/components/Rubric.tsx";
 import { WritingTask } from "../../src/components/WritingTask.tsx";
-import { isExtraWriting } from "../../src/content/writing.ts";
-import { loadCourse, weekSummaries } from "../../src/server/load.ts";
-import type { WeekSummary } from "../../src/lib/weeks.ts";
+import { loadCourse } from "../../src/server/load.ts";
 import { groupScore } from "../../src/lib/progress.ts";
-import { ADVICE_TEXT, advise, percent } from "../../src/lib/checkpoint.ts";
+import { percent } from "../../src/lib/checkpoint.ts";
 import { useProgress } from "../../src/state/ProgressContext.tsx";
 
 interface Props {
-  cp: Checkpoint;
-  week: WeekSummary;
-  tasks: Task[];
-  speakingKey: string;
+  n: number;
+  canDo: string[];
+  exam: CheckpointExam;
+  items: Record<string, Item>;
   criteria: string[];
   checklist: string[];
 }
 
-const AREAS = ["Review quiz", "Reading", "Writing", "Speaking"];
+function Passage({ passage }: { passage: ExamPassage }) {
+  return (
+    <blockquote lang="de">
+      <p>
+        <strong>{passage.title}</strong>
+      </p>
+      {passage.paragraphs.map((line, k) => (
+        <p key={k}>{line}</p>
+      ))}
+    </blockquote>
+  );
+}
 
-export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria, checklist }: Props) {
+function Score({ label, value }: { label: string; value: string | null }) {
+  return <p className="exam-score">{label}: {value ?? "not finished yet"}</p>;
+}
+
+export default function CheckpointPage({ n, canDo: statements, exam, items, criteria, checklist }: Props) {
   const { progress, update } = useProgress();
-  const firstTry = (ids: string[]) => {
-    const s = groupScore(progress, ids);
-    return s.done < s.total ? null : percent(s.correct, s.total);
-  };
-  const writingScores = tasks.map((t) => progress.writing[t.id]?.score ?? []);
-  const writing = writingScores.every((s) => s.length === criteria.length)
-    ? percent(writingScores.flat().reduce((a, b) => a + b, 0), tasks.length * criteria.length * 2)
-    : null;
-  const speakingScore = progress.speaking[speakingKey] ?? [];
-  const speaking = speakingScore.length === SPEAKING_CRITERIA.length ? percent(speakingScore.reduce((a, b) => a + b, 0), 9) : null;
-  const areas = [firstTry(week.ids.quiz ?? []), firstTry(week.ids.reading ?? []), writing, speaking];
-  const { advice, below } = advise(areas);
-  const canDo = progress.canDo[`cp${cp.n}`] ?? [];
+  const readingIds = exam.reading.flatMap((part) => part.itemIds);
+  const formIds = exam.form.fields.flatMap((field) => (field.itemId ? [field.itemId] : []));
+  const read = groupScore(progress, readingIds);
+  const reading = read.done < read.total ? null : percent(read.correct, read.total);
+  const form = groupScore(progress, formIds);
+  const letter = progress.writing[exam.letter.task.id]?.score ?? [];
+  const writingMax = formIds.length + criteria.length * 2;
+  const writingPoints = form.correct + letter.reduce((a, b) => a + b, 0);
+  const writing = form.done < form.total || letter.length !== criteria.length ? null : percent(writingPoints, writingMax);
+  const spoken = progress.speaking[exam.speakingKey] ?? [];
+  const speaking = spoken.length === SPEAKING_CRITERIA.length ? percent(spoken.reduce((a, b) => a + b, 0), SPEAKING_CRITERIA.length * 3) : null;
+  const canDo = progress.canDo[`cp${n}`] ?? [];
+  const first = exam.topics[0];
+  const last = exam.topics[exam.topics.length - 1];
+  const item = (id: string) => (items[id] ? <ItemView key={id} item={items[id]} /> : null);
 
   return (
-    <Layout title={`Checkpoint ${cp.n}`}>
+    <Layout title={`Checkpoint ${n}`}>
       <h1>
-        Checkpoint {cp.n} (topic {cp.week} review)
+        Checkpoint {n}: topics {first}–{last}
       </h1>
-      <p className="feedback neutral">
-        <strong>Self-assessment, not a certificate.</strong> You only get an official A2 certificate by passing an official exam.
+      <p className="muted">
+        Exam timing for practice: reading and writing together take about 50 minutes, speaking about 15 minutes with a partner. Review first:{" "}
+        {exam.topics.map((topic, k) => (
+          <span key={topic}>
+            {k ? " · " : ""}
+            <Link href={`/woche/${topic}`}>Topic {topic}</Link>
+          </span>
+        ))}
       </p>
 
-      <section className="card">
-        <h2>Part 1: Results from topic {cp.week}</h2>
-        <p className="muted">Only answers that were correct on the first try count. Finish any open areas in the topic first.</p>
-        <table>
-          <tbody>
-            {AREAS.map((a, k) => (
-              <tr key={a}>
-                <th scope="row">{a}</th>
-                <td>{areas[k] === null ? "not done yet" : `${areas[k]} %`}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p>
-          <Link href={`/woche/${cp.week}`}>Go to topic {cp.week}</Link>
-        </p>
-      </section>
-
-      <section className="card">
-        <h2>Part 2: Writing</h2>
-        {cp.writing ? null : <p className="muted">Checkpoint 3 uses the two writing tasks from topic 12.</p>}
-        {tasks.map((t) => (
-          <WritingTask key={t.id} task={t} criteria={criteria} max={2} checklist={checklist} />
+      <section className="card" aria-labelledby="lesen">
+        <h2 id="lesen">Lesen (reading)</h2>
+        <Score label="First-try score" value={reading === null ? null : `${read.correct} / ${read.total} (${reading} %)`} />
+        {exam.reading.map((part, k) => (
+          <div key={part.title} className="exam-part">
+            <h3>{part.title}</h3>
+            <p lang="de">{part.instruction}</p>
+            <p className="muted">{part.instructionEn}</p>
+            {part.stretch ? <p className="muted"><em>A2 stretch practice: this text is longer than a typical exam text. Read the statements first, then look for the matching part.</em></p> : null}
+            {k === 2 ? (
+              <ul className="ads" lang="de">
+                {part.passages.map((ad) => (
+                  <li key={ad.title}>
+                    <strong className="ad-key">{ad.title}</strong>
+                    {ad.paragraphs.map((line, j) => (
+                      <p key={j}>{line}</p>
+                    ))}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              part.passages.map((p) => <Passage key={p.title} passage={p} />)
+            )}
+            <div lang="de">{part.itemIds.map(item)}</div>
+          </div>
         ))}
       </section>
 
-      <section className="card">
-        <h2>Part 3: Speaking</h2>
-        {cp.speaking ? (
-          <p>
-            <InlineText segs={cp.speaking} />
-          </p>
-        ) : (
-          <p>Use your recording from topic 12 (speaking parts 1–3) and compare it with your first recording.</p>
-        )}
+      <section className="card" aria-labelledby="schreiben">
+        <h2 id="schreiben">Schreiben (writing)</h2>
+        <Score label="Score" value={writing === null ? null : `${writingPoints} / ${writingMax} (${writing} %)`} />
+        <p className="muted">Teil 1 counts first-try correct answers. Teil 2 uses your self-rating with the writing rubric.</p>
+        <div className="exam-part">
+          <h3>Schreiben, Teil 1: {exam.form.title}</h3>
+          <p lang="de">{exam.form.instruction}</p>
+          <p className="muted">{exam.form.instructionEn}</p>
+          <Passage passage={exam.form.source} />
+          <div className="exam-form" lang="de">
+            {exam.form.fields.map((field) =>
+              field.itemId ? (
+                item(field.itemId)
+              ) : (
+                <p key={field.label} className="form-given">
+                  <span className="muted">{field.label}:</span> {field.value}
+                </p>
+              ),
+            )}
+          </div>
+        </div>
+        <div className="exam-part">
+          <h3>Schreiben, Teil 2</h3>
+          <p className="muted">{exam.letter.instructionEn}</p>
+          <ul className="prompt-cards" lang="de" aria-label="Points to choose from">
+            {exam.letter.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+          <WritingTask task={exam.letter.task} criteria={criteria} max={2} checklist={checklist} />
+        </div>
+      </section>
+
+      <section className="card" aria-labelledby="sprechen">
+        <h2 id="sprechen">Sprechen (speaking)</h2>
+        <Score label="Self-rating" value={speaking === null ? null : `${spoken.reduce((a, b) => a + b, 0)} / ${SPEAKING_CRITERIA.length * 3} (${speaking} %)`} />
+        <p className="muted">Practise all three parts with a partner or tutor if you can. Alone, record yourself for each part and listen back before you rate.</p>
+        {exam.speaking.map((part) => (
+          <div key={part.title} className="exam-part">
+            <h3>{part.title}</h3>
+            <p lang="de">{part.instruction}</p>
+            <p className="muted">{part.instructionEn}</p>
+            <ul className="prompt-cards" lang="de">
+              {part.cards.map((card) => (
+                <li key={card}>{card}</li>
+              ))}
+            </ul>
+            {part.table ? (
+              <div className="table-wrap">
+                <table lang="de">
+                  <thead>
+                    <tr>
+                      {part.table.header.map((h) => (
+                        <th key={h} scope="col">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {part.table.rows.map((row) => (
+                      <tr key={row[0]}>
+                        {row.map((cell, j) => (
+                          <td key={j} data-label={part.table?.header[j]}>{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+            {part.model ? (
+              <details>
+                <summary>Example answers</summary>
+                <ul lang="de">
+                  {part.model.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+          </div>
+        ))}
         <Recorder />
         <Rubric
-          title="Rate your speaking"
+          title="Rate your speaking (all three parts)"
           criteria={SPEAKING_CRITERIA}
           max={3}
-          value={speakingScore}
-          onChange={(v) => update((p) => ({ ...p, speaking: { ...p.speaking, [speakingKey]: v } }))}
+          value={spoken}
+          onChange={(v) => update((p) => ({ ...p, speaking: { ...p.speaking, [exam.speakingKey]: v } }))}
         />
       </section>
 
       <section className="card">
-        <h2>Part 4: I can …</h2>
+        <h2>I can …</h2>
         <p className="muted">1 = not yet · 2 = with help · 3 = confidently</p>
-        {cp.canDo.map((c, k) => (
+        {statements.map((c, k) => (
           <div key={c} className="rubric-row">
             <span>… {c}</span>
             <div className="options" role="radiogroup" aria-label={c}>
-              {[1, 2, 3].map((n) => (
+              {[1, 2, 3].map((v) => (
                 <button
-                  key={n}
+                  key={v}
                   type="button"
                   role="radio"
-                  aria-checked={canDo[k] === n}
-                  className={canDo[k] === n ? "option selected" : "option"}
-                  onClick={() => update((p) => ({ ...p, canDo: { ...p.canDo, [`cp${cp.n}`]: cp.canDo.map((_, j) => (j === k ? n : canDo[j] ?? 0)) } }))}
+                  aria-checked={canDo[k] === v}
+                  className={canDo[k] === v ? "option selected" : "option"}
+                  onClick={() => update((p) => ({ ...p, canDo: { ...p.canDo, [`cp${n}`]: statements.map((_, j) => (j === k ? v : canDo[j] ?? 0)) } }))}
                 >
-                  {n}
+                  {v}
                 </button>
               ))}
             </div>
@@ -118,28 +213,13 @@ export default function CheckpointPage({ cp, week, tasks, speakingKey, criteria,
         ))}
       </section>
 
-      <section className="card" aria-live="polite">
-        <h2>What now?</h2>
-        <p className={advice === "incomplete" ? "muted" : "feedback neutral"}>{ADVICE_TEXT[advice]}</p>
-        {below.length ? <p>Below 60 %: {below.map((k) => AREAS[k]).join(", ")}</p> : null}
-        {canDo.some((v) => v === 1) ? <p>Statements rated "1": revisit that situation as a role-play when you next practise.</p> : null}
-        {cp.n === 3 && advice !== "incomplete" ? (
-          <p>
-            Next step: take the free official practice test under exam conditions (see <Link href="/material/hoeren-lesen">Listening and reading</Link>), then decide: exam or B1.
-          </p>
-        ) : null}
-      </section>
     </Layout>
   );
 }
 
 export const getServerSideProps = protect<Props>(({ params }) => {
   const course = loadCourse();
-  const cp = course.checkpoints.find((c) => c.n === Number(params?.n));
-  const week = cp ? weekSummaries(course)[cp.week - 1] : undefined;
-  if (!cp || !week) return { notFound: true };
-  const tasks = cp.writing ? [cp.writing] : (course.weeks[cp.week - 1]?.writing ?? []).filter((t) => !isExtraWriting(t.id));
-  return {
-    props: { cp, week, tasks, speakingKey: cp.speaking ? `cp${cp.n}` : `w${cp.week}`, criteria: course.rubric.writing, checklist: course.rubric.checklist },
-  };
+  const cp: Checkpoint | undefined = course.checkpoints.find((c) => c.n === Number(params?.n));
+  if (!cp?.exam || !cp.items) return { notFound: true };
+  return { props: { n: cp.n, canDo: cp.canDo, exam: cp.exam, items: cp.items, criteria: course.rubric.writing, checklist: course.rubric.checklist } };
 });

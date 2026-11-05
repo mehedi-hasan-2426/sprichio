@@ -65,6 +65,26 @@ test("rubric scores move with arrow keys", async ({ page }) => {
   await expect(group.getByRole("radio", { checked: true })).not.toHaveText("1");
 });
 
+test("checkpoint shows telc-style reading, writing and speaking and scores a reading answer", async ({ page }) => {
+  await enterAsGuest(page);
+  for (const checkpoint of [1, 2, 3]) {
+    await page.goto(`/checkpoint/${checkpoint}`);
+    await expect(page.getByText("telc-aligned practice, not a full mock exam.")).toHaveCount(0);
+    await expect(page.getByText("Official format and free practice test:", { exact: false })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "What now?", exact: true })).toHaveCount(0);
+    await expect(page.getByText("Not all areas are done yet.", { exact: true })).toHaveCount(0);
+    for (const name of ["Lesen (reading)", "Schreiben (writing)", "Sprechen (speaking)"]) {
+      await expect(page.getByRole("heading", { level: 2, name })).toBeVisible();
+    }
+    await expect(page.locator(".ads li")).toHaveCount(8);
+    await noHorizontalScroll(page);
+  }
+  await page.goto("/checkpoint/1");
+  const first = page.locator("fieldset.item").first();
+  await first.getByRole("button", { name: /den Vermieter/ }).click();
+  await expect(first.getByText("Correct!")).toBeVisible();
+});
+
 test("writing shows one task at a time", async ({ page }) => {
   await enterAsGuest(page);
   const writing = (await sectionLinks(page)).find((l) => /writ|schreib/i.test(l.text + l.href));
