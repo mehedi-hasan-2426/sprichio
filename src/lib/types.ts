@@ -97,6 +97,8 @@ export interface Unit {
   writing: WritingTask[];
   notes: Record<string, Block[]>;
   shortDay: Inline[];
+  grammarLesson?: GrammarLesson;
+  grammarLinks?: { slug: string; title: string }[];
 }
 
 export interface ExamPassage {

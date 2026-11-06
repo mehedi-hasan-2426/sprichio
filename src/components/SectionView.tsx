@@ -1,5 +1,7 @@
 import type { Section, Unit, WritingTask as WritingTaskData } from "../lib/types.ts";
+import Link from "next/link";
 import { Blocks } from "./Blocks.tsx";
+import { GrammarLesson } from "./GrammarLesson.tsx";
 import { ItemView } from "./ItemView.tsx";
 import { ListeningSoon } from "./ListeningSoon.tsx";
 import { Recorder } from "./Recorder.tsx";
@@ -39,6 +41,19 @@ export function SectionView({ unit, section, rubric, idPrefix }: { unit: Unit; s
       <div lang={section.role === "reading" || section.role === "writing" ? "de" : undefined}>
         <Blocks blocks={section.blocks} items={unit.items} renderItem={(item) => level === "all" || (item.difficulty ?? "core") === level ? <ItemView item={item} /> : null} idPrefix={idPrefix} />
       </div>
+      {section.role === "grammar" && unit.grammarLesson ? (
+        <div className="topic-grammar">
+          <GrammarLesson lesson={unit.grammarLesson} />
+          {unit.grammarLinks?.length ? (
+            <section aria-labelledby="more-grammar" className="more-grammar">
+              <h2 id="more-grammar" className="grammar-h2">Practise more</h2>
+              <ul className="path-guides">
+                {unit.grammarLinks.map((link) => <li key={link.slug}><Link href={`/grammatik/${link.slug}`}>{link.title}</Link></li>)}
+              </ul>
+            </section>
+          ) : null}
+        </div>
+      ) : null}
       {section.role === "speaking" ? (
         <>
           <Recorder />
