@@ -20,7 +20,7 @@ const GUIDES: [string, string][] = [
   ["/material/grammatik", "Grammar overview"],
   ["/material/wortschatz", "Vocabulary and review"],
   ["/material/hoeren-lesen", "Listening and reading resources"],
-  ["/material/sprechen", "Speaking and pronunciation"],
+  ["/material/sprechen", "Speaking"],
   ["/material/schreiben", "Writing rubric and phrases"],
 ];
 

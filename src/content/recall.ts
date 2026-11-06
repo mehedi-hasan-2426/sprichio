@@ -26,7 +26,7 @@ function describe(items: Item[]): { title: string; text: string } | null {
     return { title: "Which verb fits?", text: "Complete each phrase with the matching verb in the infinitive (the dictionary form)." };
   }
   if (items.every((i) => i.kind === "open")) {
-    return { title: "Your own answer", text: "Write your own answer. Several answers can be right; compare yours with the example answer." };
+    return { title: "Your own answer", text: "Write your own answer, then compare it with the example answer." };
   }
   return { title: "Complete the phrases", text: "Fill in the gaps with words from this topic's vocabulary list." };
 }
@@ -47,7 +47,7 @@ export function pluralHint(noun: string, plural: string): string {
 
 function betterHint(item: Item): string {
   const answer = item.answers[0]?.join(" … ") ?? "";
-  if (!answer) return "Use a word from this topic's vocabulary list. Other fitting answers are possible.";
+  if (!answer) return "Use a word from this topic's vocabulary list.";
   const word = answer.replace(/^(der|die|das) /, "");
   const singular = item.prompt.split("→")[0]?.replace(/^(der|die|das) /, "").replace(/\(.*\)/, "").trim() ?? "";
   if (/^die /.test(answer) && item.prompt.includes("→") && singular) return pluralHint(singular, word);

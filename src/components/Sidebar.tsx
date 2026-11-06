@@ -1,44 +1,13 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { createContext, useContext, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useState } from "react";
 import type { NavWeek } from "../lib/weeks.ts";
 import { sectionTitle, STAGES, weekTitle } from "../lib/weeks.ts";
 import { useProgress } from "../state/ProgressContext.tsx";
 import type { Progress } from "../lib/progress.ts";
 import { RoleIcon } from "./RoleIcon.tsx";
-import { LEVEL_KEY, parseLevel } from "../lib/levels.ts";
-import type { Level } from "../lib/levels.ts";
 
 export const CourseNavigation = createContext<NavWeek[]>([]);
-
-const LEVEL_EVENT = "sprungbrett:level-changed";
-
-function readLevel(): Level {
-  try {
-    return parseLevel(window.localStorage.getItem(LEVEL_KEY));
-  } catch {
-    return "A2";
-  }
-}
-
-function subscribeLevel(notify: () => void) {
-  window.addEventListener(LEVEL_EVENT, notify);
-  window.addEventListener("storage", notify);
-  return () => {
-    window.removeEventListener(LEVEL_EVENT, notify);
-    window.removeEventListener("storage", notify);
-  };
-}
-
-function storeLevel(level: Level) {
-  try {
-    window.localStorage.setItem(LEVEL_KEY, level);
-  } catch {
-    return;
-  } finally {
-    window.dispatchEvent(new Event(LEVEL_EVENT));
-  }
-}
 
 function topicPercent(progress: Progress, week: NavWeek): number {
   if (!week.total) return 0;
@@ -55,7 +24,6 @@ export function Sidebar() {
   const [term, setTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [toggled, setToggled] = useState<Record<number, boolean>>({});
-  const level = useSyncExternalStore(subscribeLevel, readLevel, () => "A2" as Level);
   const current = Number(query.n) || 0;
   const q = term.trim().toLowerCase();
   const path = asPath.split(/[?#]/)[0];
@@ -82,21 +50,6 @@ export function Sidebar() {
       <div className="sidebar-body">
         <label className="sr-only" htmlFor="course-search">Search lessons</label>
         <input id="course-search" type="search" placeholder="Search lessons" value={term} onChange={(e) => setTerm(e.target.value)} />
-        <div className="level-picker" role="radiogroup" aria-label="Level">
-          {(["A1", "A2"] as const).map((l) => (
-            <button key={l} type="button" role="radio" aria-checked={level === l} className={level === l ? "level-option is-active" : "level-option"} onClick={() => storeLevel(l)}>
-              {l}
-            </button>
-          ))}
-        </div>
-        {level === "A1" ? (
-          <div className="level-soon">
-            <p><strong>A1 is coming soon.</strong></p>
-            <p className="muted">The beginner course is being prepared. Until then, practise with A2.</p>
-            <button type="button" className="secondary" onClick={() => storeLevel("A2")}>Show A2</button>
-          </div>
-        ) : (
-          <>
         <ul className="side-top">
           {top("/einstufung", "Placement test", "placement")}
           {top("/plan", "Learning path", "path")}
@@ -152,8 +105,6 @@ export function Sidebar() {
           })}
         </div>
         {q && !weeks.length ? <p className="muted">No lessons match “{term}”.</p> : null}
-          </>
-        )}
       </div>
     </aside>
   );

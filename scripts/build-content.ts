@@ -12,6 +12,7 @@ import { addGrammarPractice } from "../src/content/grammar.ts";
 import { makeSelfPaced } from "../src/content/self-paced.ts";
 import { applyReadings } from "../src/content/reading.ts";
 import { addCheckpointExams } from "../src/content/checkpoint-exams.ts";
+import { focusOnA2 } from "../src/content/a2-focus.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "content", "source");
@@ -63,6 +64,7 @@ addWritingPractice(english);
 makeSelfPaced(english);
 addGrammarPractice(english);
 addCheckpointExams(english);
+focusOnA2(english);
 for (const entry of english.vocab) {
   if (!entry.meaning?.trim() || !entry.exampleEn?.trim() || !entry.example.trim() || !entry.forms.trim()) {
     throw new Error(`Incomplete bilingual vocabulary: ${entry.id}`);

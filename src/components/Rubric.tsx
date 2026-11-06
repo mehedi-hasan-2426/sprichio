@@ -50,4 +50,4 @@ export function Rubric({ criteria, max, value, onChange, title }: { criteria: st
   );
 }
 
-export const SPEAKING_CRITERIA = ["Task", "Clarity / pronunciation", "Grammar / vocabulary"];
+export const SPEAKING_CRITERIA = ["Task", "Clarity", "Grammar / vocabulary"];

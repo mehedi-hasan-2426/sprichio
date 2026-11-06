@@ -114,7 +114,7 @@ export const getServerSideProps = protect<Props>(() => {
     props: {
       weeks: weekSummaries(course),
       placementIds: Object.values(course.placement.items).filter((i) => i.kind !== "open" && !i.id.startsWith("p-b")).map((i) => i.id),
-      roleOrder: ["exercises", "retrieval", "reading", "pronunciation", "quiz"],
+      roleOrder: ["dialogue", "exercises", "retrieval", "reading", "quiz"],
     },
   };
 });
