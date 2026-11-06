@@ -33,7 +33,7 @@ const GRAMMAR_ROUND: Record<string, Choice[]> = {
     ["Wir ___ an den See gefahren.", "sind", ["haben", "sind", "ist"]],
     ["Ich ___ lange geschlafen.", "habe", ["habe", "bin", "hat"]],
     ["Hast du das Buch schon ___?", "gelesen", ["gelest", "gelesen", "lesen"]],
-    ["Am Samstag ___ das Wetter super.", "war", ["war", "ist gewesen", "hat"]],
+    ["Am Samstag ___ das Wetter super.", "war", ["war", "wart", "hat"]],
     ["Wann bist du ___?", "aufgestanden", ["aufgestanden", "aufgestehen", "geaufstanden"]],
     ["Wir ___ viel Spaß.", "hatten", ["hatten", "waren", "hattet"]],
   ],
@@ -46,7 +46,7 @@ const GRAMMAR_ROUND: Record<string, Choice[]> = {
     ["Wo tut es ___ weh? (Sie)", "Ihnen", ["Sie", "Ihnen", "Ihr"]],
   ],
   w6: [
-    ["Ich gehe in ___ Supermarkt.", "den", ["dem", "den", "der"]],
+    ["Wohin gehst du? In ___ Supermarkt.", "den", ["dem", "den", "der"]],
     ["Wir treffen uns vor ___ Kino.", "dem", ["das", "dem", "den"]],
     ["Wie komme ich ___ Bahnhof?", "zum", ["zum", "nach", "zur"]],
     ["Das Fahrrad ___ vor der Tür.", "steht", ["stellt", "steht", "legt"]],
@@ -73,7 +73,7 @@ const GRAMMAR_ROUND: Record<string, Choice[]> = {
     ["Ich finde, dass der Film toll ___.", "war", ["war", "waren", "sein"]],
     ["Wenn es regnet, ___ wir ins Museum.", "gehen", ["gehen", "wir gehen", "gehst"]],
     ["Ich freue ___ auf die Party.", "mich", ["mich", "mir", "sich"]],
-    ["Wir treffen ___ um acht.", "uns", ["uns", "euch", "sich"]],
+    ["Wir treffen ___ um acht.", "uns", ["uns", "unser", "sich"]],
     ["Ich hoffe, ___ du kommst.", "dass", ["dass", "das", "wenn"]],
     ["Danke für die Einladung, ich komme ___!", "gern", ["gern", "gut", "viel"]],
   ],
@@ -81,13 +81,13 @@ const GRAMMAR_ROUND: Record<string, Choice[]> = {
     ["Wir ___ zwei Stunden warten.", "mussten", ["mussten", "musste", "musstet"]],
     ["Ich ___ keinen Platz finden.", "konnte", ["konnte", "konntest", "konnten"]],
     ["Ich warte ___ einer Stunde.", "seit", ["seit", "vor", "für"]],
-    ["Ich war ___ zwei Jahren in Wien.", "vor", ["vor", "seit", "in"]],
+    ["Ich war ___ zwei Jahren in Wien. (two years ago)", "vor", ["vor", "seit", "in"]],
     ["Der Zug fährt ___ 14:30 Uhr ab.", "um", ["um", "am", "im"]],
-    ["Halb drei is ...", "2:30", ["2:30", "3:30", "3:00"]],
+    ["What time is halb drei?", "2:30", ["2:30", "3:30", "3:00"]],
   ],
   w11: [
     ["___ Sie mir bitte helfen?", "Könnten", ["Könnten", "Könntest", "Könnt"]],
-    ["Ich ___ gern einen Termin.", "hätte", ["hätte", "hatte", "habe"]],
+    ["Ich ___ gern einen Termin.", "hätte", ["hätte", "hättest", "hätten"]],
     ["Können Sie mir sagen, wo das Bürgeramt ___?", "ist", ["ist", "sind", "sein"]],
     ["Wissen Sie, ___ die Bank heute offen hat?", "ob", ["ob", "wenn", "denn"]],
     ["Ich möchte wissen, wann die Post ___.", "aufmacht", ["aufmacht", "macht auf", "auf macht"]],
@@ -103,7 +103,6 @@ const GRAMMAR_ROUND: Record<string, Choice[]> = {
   ],
 };
 
-const GRAMMATICAL_ANYWAY = new Set(["Ich will einen Kaffee.", "Ich könnte nicht kommen.", "Ich gehe im Park."]);
 const KEYS = ["a", "b", "c", "d"];
 const plain = (text: string) => parseMarks(text).map((part) => part.t).join("");
 
@@ -164,16 +163,17 @@ function distinctMeanings(words: VocabEntry[]): VocabEntry[] {
 function vocabularyRounds(quiz: Quiz, pool: VocabEntry[]): void {
   const words = distinctMeanings(pool);
   const meaning = (word: VocabEntry) => word.meaning ?? "";
-  round(quiz, "Round 1: What does it mean?", "Pick the English meaning. Quick, no peeking.");
+  round(quiz, "Round 1: What does it mean?", "Choose the English meaning.");
   for (const word of pick(words, 8, `${quiz.unit.id}-r1`)) {
     const others = pick(words.filter((other) => other !== word), 3, `${word.id}-r1`).map(meaning);
     add(quiz, `What does **${word.term}** mean?`, meaning(word), [meaning(word), ...others], "WS", "Think of the example sentence from the vocabulary list.", `${word.term}: ${meaning(word)}`);
   }
 
   const nouns = words.filter((word) => word.article && word.noun && word.plural && word.plural !== word.noun);
-  round(quiz, "Round 2: der, die or das?", "Each noun has one article. Say it aloud with the article before you tap.");
+  round(quiz, "Round 2: der, die or das?", "Say the noun with its article before you answer.");
   for (const word of pick(nouns, 6, `${quiz.unit.id}-r2`)) {
-    add(quiz, `___ **${word.noun}** (${meaning(word)})`, word.article ?? "", ["der", "die", "das"], "GE", "Learn every noun together with its article.", word.term, false);
+    const hint = meaning(word).replace(/\s*\((?:male|female)[^)]*\)/gi, "");
+    add(quiz, `___ **${word.noun}**: ${hint}`, word.article ?? "", ["der", "die", "das"], "GE", "Learn every noun together with its article.", word.term, false);
   }
 
   const cloze = nouns.filter((word) => new RegExp(`(?<![\\p{L}])${word.noun}(?![\\p{L}])`, "u").test(word.example) && word.exampleEn);
@@ -185,23 +185,22 @@ function vocabularyRounds(quiz: Quiz, pool: VocabEntry[]): void {
   }
 
   round(quiz, "Round 4: Richtig oder falsch? Words", "Does the German word match the English meaning?");
-  pick(words, 6, `${quiz.unit.id}-r4`).forEach((word, index) => {
-    const truth = index % 2 === 0;
+  pick(words, 6, `${quiz.unit.id}-r4`).forEach((word) => {
+    const truth = seed(`${word.id}-truth`) % 2 === 0;
     const shown = truth ? meaning(word) : meaning(pick(words.filter((other) => other !== word), 1, `${word.id}-r4`)[0] ?? word);
     add(quiz, `**${word.term}** = ${shown}`, truth ? "richtig" : "falsch", ["richtig", "falsch"], "WS", "Picture the word in its example sentence.", `${word.term}: ${meaning(word)}`, false);
   });
 }
 
 function grammarRounds(quiz: Quiz): void {
-  const traps = (TOPIC_GRAMMAR[quiz.unit.id]?.lesson.traps ?? []).filter(([wrong]) => !GRAMMATICAL_ANYWAY.has(wrong));
+  const traps = TOPIC_GRAMMAR[quiz.unit.id]?.lesson.traps ?? [];
   round(quiz, "Round 5: Richtig oder falsch? Grammar", "Each sentence is either correct German or a typical mistake.");
-  traps.forEach(([wrong, right, why], index) => {
-    const pair: [string, string][] = [[plain(wrong), "falsch"], [plain(right), "richtig"]];
-    for (const [sentence, answer] of index % 2 ? pair.reverse() : pair) {
-      add(quiz, `*${sentence}*`, answer, ["richtig", "falsch"], "VP", "Check the verb position, the case and the verb form.", why, false);
-    }
-  });
-  round(quiz, "Round 6: Grammar", "One answer fits. The rest are the mistakes learners make most.");
+  const sentences = traps.flatMap(([wrong, right, why]): [string, string, string][] => [[plain(wrong), "falsch", why], [plain(right), "richtig", why]]);
+  const spread = shuffled(sentences, `${quiz.unit.id}-r5`);
+  for (const [sentence, answer, why] of spread) {
+    add(quiz, `*${sentence}*`, answer, ["richtig", "falsch"], "VP", "Look at where the verb is and which case the article shows.", why, false);
+  }
+  round(quiz, "Round 6: Grammar", "Only one answer fits the gap.");
   for (const [prompt, answer, options] of GRAMMAR_ROUND[quiz.unit.id] ?? []) {
     add(quiz, prompt, answer, options, "VF", "Look at the words around the gap.", `Correct: ${answer}`);
   }
@@ -217,8 +216,8 @@ export function addReviewRounds(course: Course): void {
     vocabularyRounds(quiz, pool);
     grammarRounds(quiz);
     section.blocks = [
+      { kind: "p", text: [{ t: `${quiz.n - 1} questions. The warm-up mixes in earlier topics; rounds 1 to 6 are all about this one.` }] },
       { kind: "h", text: [{ t: "Warm-up" }] },
-      { kind: "p", text: [{ t: `${quiz.n - 1} questions in seven rounds, all from this topic. Try to get as many as you can right on the first try.` }] },
       ...section.blocks,
       ...quiz.blocks,
     ];

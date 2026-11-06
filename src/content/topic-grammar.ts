@@ -28,7 +28,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
           ["Um sieben", "*stehe*", "ich", "*auf*."],
           ["Am Abend", "*sehe*", "ich oft", "*fern*."],
           ["Wann", "*stehst*", "du", "*auf*?"],
-        ], [1, 3], "Position 1 can be the subject, a time or a question word. The verb never moves from position 2."),
+        ], [1, 3], "In statements and W-questions the verb never leaves position 2."),
         { kind: "steps", title: "Which kind of question?", steps: [
           ["Do you want a yes or a no?", "Verb first", "*Arbeitest* du heute?"],
           ["Do you want information?", "W-word, then the verb", "Wann *fängt* dein Kurs an?"],
@@ -114,9 +114,9 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
       traps: [
         ["Ich möchte ein Apfel.", "Ich möchte {A:einen} Apfel.", "Möchten takes the accusative: masculine ein becomes einen."],
         ["Ich habe nicht Zeit.", "Ich habe *keine* Zeit.", "A noun without an article takes kein."],
-        ["Ich will einen Kaffee.", "Ich *hätte gern* einen Kaffee.", "When you order, ich will sounds rude."],
+        ["Ich hätte gern ein Kaffee.", "Ich hätte gern {A:einen} Kaffee.", "Hätte gern takes the accusative: einen Kaffee."],
       ],
-      hook: "Der becomes den. Everything else stays the same.",
+      hook: "Only the masculine changes: den, einen, keinen, meinen.",
     },
   },
 
@@ -162,7 +162,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
         ["Die Wohnung gefällt mich.", "Die Wohnung gefällt {D:mir}.", "Gefallen takes the dative."],
         ["Ich helfe den Nachbar.", "Ich helfe {D:dem} Nachbar*n*.", "Helfen takes the dative, and Nachbar adds -n."],
       ],
-      hook: "Wem? Dative: who gets it, who is helped, who owns it.",
+      hook: "Wem? means dative.",
     },
   },
 
@@ -188,7 +188,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
           ["Ich *habe* meine Oma *besucht*.", "I visited my grandma."],
           ["Wir *haben* im Park *gegrillt*.", "We had a barbecue in the park."],
         ] },
-        { title: "Sein for moving and changing", text: "Going, driving, flying, getting up and falling asleep take sein.", examples: [
+        { title: "Sein for moving and changing", text: "Going, driving, flying, getting up and falling asleep take sein. So do sein, bleiben and passieren.", examples: [
           ["Wir *sind* an den See *gefahren*.", "We drove to the lake."],
           ["Ich *bin* früh *aufgestanden*.", "I got up early."],
           ["Was *ist* *passiert*?", "What happened?"],
@@ -209,7 +209,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
         ["Ich habe gegessen eine Pizza.", "Ich *habe* eine Pizza *gegessen*.", "The participle goes to the end."],
         ["Er ist gut geschlafen.", "Er *hat* gut *geschlafen*.", "Sleeping is not moving: haben."],
       ],
-      hook: "Moving or changing: sein. Everything else: haben.",
+      hook: "Moving or changing, plus sein, bleiben and passieren: sein. Everything else: haben.",
     },
   },
 
@@ -273,7 +273,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
             ["Biegen Sie an {D:der} Ampel links ab.", "Turn left at the traffic lights."],
             ["Gehen Sie über {A:die} Brücke.", "Go over the bridge."],
             ["Die Post ist neben {D:der} Bank.", "The post office is next to the bank."],
-            ["Das Café ist gegenüber {D:vom} Rathaus.", "The café is opposite the town hall."],
+            ["Das Café ist gegenüber {D:dem} Rathaus.", "The café is opposite the town hall."],
           ] },
       ],
       points: [
@@ -299,7 +299,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
         ] },
       ],
       traps: [
-        ["Ich gehe im Park.", "Ich gehe in {A:den} Park.", "Going there is a goal: accusative."],
+        ["Wohin gehst du? Im Park.", "Wohin gehst du? In {A:den} Park.", "Wohin? asks for a goal: accusative."],
         ["Das Rad stellt vor der Tür.", "Das Rad *steht* vor {D:der} Tür.", "Where it is: stehen."],
         ["Wie komme ich nach dem Bahnhof?", "Wie komme ich {D:zum} Bahnhof?", "Places in town: zu, not nach."],
       ],
@@ -374,7 +374,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
         { title: "Describing clothes", text: "Before a noun the adjective needs an ending. After sein it doesn't.", examples: [
           ["Ich suche {A:einen} warm*en* Pullover.", "I'm looking for a warm sweater."],
           ["Das rot*e* Kleid steht dir gut.", "The red dress suits you."],
-          ["Die Hose ist zu kurz.", "The pants are too short."],
+          ["Die Hose ist zu kurz.", "The trousers are too short."],
         ] },
         { title: "Presents: person dative, thing accusative", text: "When you give something, the person is dative and the present is accusative.", examples: [
           ["Ich schenke {D:meiner} Schwester {A:einen} Schal.", "I'm giving my sister a scarf."],
@@ -385,9 +385,9 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
       traps: [
         ["Die Jacke ist billiger wie der Mantel.", "Die Jacke ist billiger *als* der Mantel.", "Comparative + als."],
         ["Ich suche ein warm Pullover.", "Ich suche {A:einen} warm*en* Pullover.", "Accusative masculine: einen + -en."],
-        ["Das ist teuerer.", "Das ist teu*rer*.", "Teuer drops an e: teurer."],
+        ["Das ist mehr teuer.", "Das ist teu*rer*.", "No mehr before the adjective. Add -er, and teuer drops an e."],
       ],
-      hook: "Five places take -e. Everything else takes -en.",
+      hook: "After der, die, das: five places take -e. Everything else takes -en.",
     },
   },
 
@@ -471,8 +471,8 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
       ],
       traps: [
         ["Ich musste warten zwei Stunden.", "Ich *musste* zwei Stunden *warten*.", "The infinitive goes to the end."],
-        ["Ich warte für eine Stunde.", "Ich warte *seit* {D:einer} Stunde.", "Still waiting now: seit."],
-        ["Ich könnte nicht kommen.", "Ich *konnte* nicht kommen.", "Konnte is the past. Könnte means could, as in maybe."],
+        ["Ich warte schon für eine Stunde.", "Ich warte schon *seit* {D:einer} Stunde.", "Still waiting now: seit."],
+        ["Gestern ich konnte nicht kommen.", "Gestern *konnte* ich nicht kommen.", "The verb stays in position 2."],
       ],
       hook: "Halb drei is half an hour before three: 2:30.",
     },
@@ -561,7 +561,7 @@ export const TOPIC_GRAMMAR: Record<string, TopicGrammar> = {
         ["Ich habe nach Berlin gefahren.", "Ich *bin* nach Berlin *gefahren*.", "Travelling takes sein."],
         ["..., weil ich bin krank.", "..., weil ich krank *bin*.", "After weil the verb goes last."],
       ],
-      hook: "Before the exam: verb position, case, haben or sein. Check these three in every sentence.",
+      hook: "Before the exam, check the verb position and the case in every sentence.",
     },
   },
 };
