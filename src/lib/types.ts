@@ -151,6 +151,26 @@ export interface Doc {
   blocks: Block[];
 }
 
+export type GrammarExample = [de: string, en: string];
+
+export type GrammarVisual =
+  | { kind: "table"; title: string; head: string[]; rows: string[][]; mark?: number[]; note?: string }
+  | { kind: "steps"; title: string; steps: [question: string, answer: string, example: string][] }
+  | { kind: "scene"; title: string; spots: [preposition: string, where: string, whereTo: string, whereEn: string, whereToEn: string][] };
+
+export interface GrammarPoint {
+  title: string;
+  text: string;
+  examples: GrammarExample[];
+}
+
+export interface GrammarLesson {
+  visuals: GrammarVisual[];
+  points: GrammarPoint[];
+  traps: [wrong: string, right: string, why: string][];
+  hook?: string;
+}
+
 export interface GrammarTopic {
   slug: string;
   title: string;
@@ -159,6 +179,7 @@ export interface GrammarTopic {
   summary: string;
   rule: string;
   source: string | null;
+  lesson: GrammarLesson | null;
   items: Item[];
 }
 

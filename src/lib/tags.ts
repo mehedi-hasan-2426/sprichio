@@ -11,7 +11,7 @@ export const CATEGORIES: Record<Category, CategoryInfo> = {
   GE: { label: "Gender (der/die/das)", practice: [{ label: "Article trainer", href: "/artikel" }] },
   PL: { label: "Plural", practice: [{ label: "Article trainer", href: "/artikel" }] },
   VF: { label: "Verb form", practice: [{ label: "Irregular verbs", href: "/grammatik/verbs/irregular" }, { label: "Present perfect", href: "/grammatik/tenses/present-perfect" }] },
-  PR: { label: "Prepositions", practice: [{ label: "Accusative or dative", href: "/grammatik/cases/accusative-dative" }] },
+  PR: { label: "Prepositions", practice: [{ label: "Two-way prepositions", href: "/grammatik/prepositions/two-way" }, { label: "Dative prepositions", href: "/grammatik/prepositions/dative" }] },
   WS: { label: "Vocabulary and understanding", practice: [{ label: "Flashcards", href: "/karten" }] },
   AU: { label: "Pronunciation", practice: [{ label: "Speaking and pronunciation", href: "/material/sprechen" }] },
   RS: { label: "Spelling and capitals", practice: [{ label: "Grammar overview", href: "/material/grammatik" }] },

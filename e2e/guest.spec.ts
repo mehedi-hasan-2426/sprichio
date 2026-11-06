@@ -136,3 +136,28 @@ test("flashcards page loads for guests", async ({ page }) => {
   await expect(page.locator("main")).toBeVisible();
   await noHorizontalScroll(page);
 });
+
+test("two-way prepositions switch between wo and wohin in the scene", async ({ page }) => {
+  await enterAsGuest(page);
+  await page.goto("/grammatik/prepositions/two-way");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Two-way prepositions: wo or wohin");
+  const line = page.locator(".scene-line");
+  await expect(line).toContainText("Der Ball liegt auf dem Tisch.");
+  await page.getByRole("button", { name: /^Wohin\?/ }).click();
+  await expect(line).toContainText("Ich lege den Ball auf den Tisch.");
+  await page.getByRole("group", { name: "Preposition" }).getByRole("button", { name: "unter", exact: true }).click();
+  await expect(line).toContainText("Der Ball rollt unter den Tisch.");
+  await expect(page.getByRole("heading", { name: "Common mistakes" })).toBeVisible();
+  await noHorizontalScroll(page);
+  await page.getByRole("link", { name: "Skip to the 15 exercises" }).click();
+  await expect(page.getByRole("heading", { name: "Practice", exact: true })).toBeInViewport();
+});
+
+test("every grammar lesson fits the screen without sideways scrolling", async ({ page }) => {
+  await enterAsGuest(page);
+  for (const slug of ["cases/nominative-accusative-dative", "prepositions/places", "prepositions/time", "verbs/separable", "adjectives/endings", "conjunctions/subordinate"]) {
+    await page.goto(`/grammatik/${slug}`);
+    await expect(page.getByRole("heading", { name: "How it works" })).toBeVisible();
+    await noHorizontalScroll(page);
+  }
+});
