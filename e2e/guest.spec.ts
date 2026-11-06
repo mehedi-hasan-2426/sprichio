@@ -161,3 +161,19 @@ test("every grammar lesson fits the screen without sideways scrolling", async ({
     await noHorizontalScroll(page);
   }
 });
+
+test("topic conversation reveals lines, translates them and fits the screen", async ({ page }) => {
+  await enterAsGuest(page);
+  await page.goto("/woche/2/gespraech");
+  await expect(page.getByRole("heading", { name: "Im Café" })).toBeVisible();
+  await expect(page.getByRole("img", { name: /At the café/ })).toBeVisible();
+  await page.getByRole("button", { name: "Next line" }).click();
+  await expect(page.locator(".bubble").first()).toContainText("Was möchten Sie bestellen?");
+  await page.getByRole("button", { name: "English" }).click();
+  await expect(page.locator(".bubble-en").first()).toHaveText("Hello! What would you like to order?");
+  await page.getByRole("button", { name: "Show all" }).click();
+  await expect(page.locator(".bubble")).toHaveCount(11);
+  await expect(page.getByText("Line 11 of 11")).toBeVisible();
+  await page.getByRole("button", { name: "richtig" }).first().click();
+  await noHorizontalScroll(page);
+});

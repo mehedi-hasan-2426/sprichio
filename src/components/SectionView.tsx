@@ -2,6 +2,7 @@ import type { Section, Unit, WritingTask as WritingTaskData } from "../lib/types
 import Link from "next/link";
 import { Blocks } from "./Blocks.tsx";
 import { GrammarLesson } from "./GrammarLesson.tsx";
+import { DialogueView } from "./DialogueView.tsx";
 import { ItemView } from "./ItemView.tsx";
 import { ListeningSoon } from "./ListeningSoon.tsx";
 import { Recorder } from "./Recorder.tsx";
@@ -30,7 +31,7 @@ export function SectionView({ unit, section, rubric, idPrefix }: { unit: Unit; s
   return (
     <>
       {score ? (
-        <div className="scoreboard" aria-live="polite">
+        <div className="scoreboard">
           <p><strong>{score.correct}</strong> <span>right first time</span></p>
           <p><strong>{score.done}/{score.total}</strong> <span>answered</span></p>
         </div>
@@ -46,6 +47,7 @@ export function SectionView({ unit, section, rubric, idPrefix }: { unit: Unit; s
           ))}
         </fieldset>
       ) : null}
+      {section.role === "dialogue" && unit.dialogue ? <DialogueView dialogue={unit.dialogue} /> : null}
       <div lang={section.role === "reading" || section.role === "writing" ? "de" : undefined}>
         <Blocks blocks={section.blocks} items={unit.items} renderItem={(item) => level === "all" || (item.difficulty ?? "core") === level ? <ItemView item={item} /> : null} idPrefix={idPrefix} />
       </div>

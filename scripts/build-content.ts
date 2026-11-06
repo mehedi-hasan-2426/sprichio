@@ -15,6 +15,7 @@ import { addCheckpointExams } from "../src/content/checkpoint-exams.ts";
 import { focusOnA2 } from "../src/content/a2-focus.ts";
 import { addTopicGrammar } from "../src/content/topic-grammar.ts";
 import { addReviewRounds } from "../src/content/review.ts";
+import { addDialogues } from "../src/content/dialogues.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "content", "source");
@@ -67,6 +68,7 @@ makeSelfPaced(english);
 addGrammarPractice(english);
 addTopicGrammar(english);
 addReviewRounds(english);
+addDialogues(english);
 addCheckpointExams(english);
 focusOnA2(english);
 for (const entry of english.vocab) {

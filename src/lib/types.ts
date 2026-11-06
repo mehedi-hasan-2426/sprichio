@@ -44,6 +44,7 @@ export interface Section {
 }
 
 export type SectionRole =
+  | "dialogue"
   | "vocab"
   | "grammar"
   | "exercises"
@@ -99,6 +100,30 @@ export interface Unit {
   shortDay: Inline[];
   grammarLesson?: GrammarLesson;
   grammarLinks?: { slug: string; title: string }[];
+  dialogue?: Dialogue;
+}
+
+export type Speaker = "anna" | "max";
+export type SceneName = "cafe" | "cafe-table" | "apartment" | "bakery" | "doctor" | "street" | "office" | "shop" | "park" | "station" | "counter";
+export type Mood = "smile" | "unsure" | "surprised";
+
+export interface DialogueLine {
+  who: Speaker;
+  de: string;
+  en: string;
+  mood?: Mood;
+}
+
+export interface Dialogue {
+  title: string;
+  titleEn: string;
+  scene: SceneName;
+  situation: string;
+  left: Speaker;
+  roles: Record<Speaker, string>;
+  lines: DialogueLine[];
+  words: [de: string, en: string][];
+  phrases: [de: string, en: string][];
 }
 
 export interface ExamPassage {

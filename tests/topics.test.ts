@@ -44,3 +44,21 @@ test("every topic review has at least 40 mixed questions with one right option e
     assert.deepEqual(items.map((item) => item.n), items.map((_, k) => k + 1), `${unit.id} numbering`);
   }
 });
+
+test("every topic opens with an Anna and Max conversation", () => {
+  const scenes = new Set(["cafe", "cafe-table", "apartment", "bakery", "doctor", "street", "office", "shop", "park", "station", "counter"]);
+  for (const unit of course.weeks) {
+    const dialogue = unit.dialogue;
+    assert.ok(dialogue, `${unit.id} has no conversation`);
+    assert.equal(unit.sections[0]?.role, "dialogue", unit.id);
+    assert.ok(scenes.has(dialogue.scene), unit.id);
+    assert.ok(dialogue.lines.length >= 10, `${unit.id} lines`);
+    assert.deepEqual(new Set(dialogue.lines.map((line) => line.who)), new Set(["anna", "max"]), unit.id);
+    for (const line of dialogue.lines) assert.ok(line.de.trim() && line.en.trim() && line.de !== line.en, `${unit.id}: ${line.de}`);
+    assert.ok(dialogue.words.length >= 5 && dialogue.phrases.length >= 3, unit.id);
+    const checks = unit.sections[0]?.blocks.filter((b) => b.kind === "item") ?? [];
+    assert.equal(checks.length, 4, unit.id);
+  }
+  const leftMax = course.weeks.filter((unit) => unit.dialogue?.left === "max").length;
+  assert.ok(leftMax >= 4, "Max should also lead and help, not only learn");
+});
