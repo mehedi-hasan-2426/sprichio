@@ -253,6 +253,16 @@ main[id], section[id], h2[id], h3[id] { scroll-margin-top: 5rem; }
 .traps .trap-why { display: block; padding-left: 1.5rem; color: var(--muted); font-size: 0.9rem; }
 .grammar-hook { margin: 1.5rem 0 0; padding: 0.8rem 1rem; border-left: 4px solid var(--action-line); border-radius: 0 14px 14px 0; background: var(--tint); font-family: var(--serif); font-size: 1.08rem; }
 .grammar-practice { margin-top: 1rem; }
+.scoreboard { position: sticky; top: 4.25rem; z-index: 4; display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; width: fit-content; margin: 0 0 1rem; padding: 0.4rem 1.1rem; border: 1px solid var(--action-line); border-radius: 999px; background: var(--card); box-shadow: var(--raise); }
+.scoreboard p { display: flex; align-items: baseline; gap: 0.4rem; margin: 0; }
+.scoreboard strong { font-family: var(--serif); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.scoreboard span { color: var(--muted); font-size: 0.85rem; }
+@media (max-width: 64rem) {
+  .scoreboard { top: 7rem; }
+}
+@media (max-width: 40rem) {
+  .scoreboard { top: 0.5rem; }
+}
 
 .gv-scene .scene { display: block; width: 100%; max-width: 30rem; height: auto; margin: 0.75rem auto 0.25rem; }
 .scene-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }

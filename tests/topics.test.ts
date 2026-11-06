@@ -23,3 +23,24 @@ test("every topic's grammar section has a full lesson with translated examples",
     assert.ok(unit.grammarLinks?.length && unit.grammarLinks.every((link) => slugs.has(link.slug)), `${unit.id} links`);
   }
 });
+
+test("every topic review has at least 40 mixed questions with one right option each", () => {
+  for (const unit of course.weeks) {
+    const quiz = unit.sections.find((s) => s.role === "quiz");
+    assert.ok(quiz, unit.id);
+    const items = quiz.blocks.flatMap((b) => {
+      const item = b.kind === "item" ? unit.items[b.itemId] : undefined;
+      return item ? [item] : [];
+    });
+    assert.ok(items.length >= 40, `${unit.id} review has ${items.length} questions`);
+    const choices = items.filter((item) => item.kind === "choice");
+    assert.ok(choices.filter((item) => item.display === "richtig" || item.display === "falsch").length >= 10, `${unit.id} richtig/falsch`);
+    assert.ok(choices.filter((item) => item.tag === "GE").length >= 5, `${unit.id} articles`);
+    for (const item of choices) {
+      const labels = item.options?.map((o) => o.label) ?? [];
+      assert.equal(new Set(labels).size, labels.length, item.id);
+      assert.equal(item.options?.find((o) => o.key === item.correct)?.label, item.display, item.id);
+    }
+    assert.deepEqual(items.map((item) => item.n), items.map((_, k) => k + 1), `${unit.id} numbering`);
+  }
+});

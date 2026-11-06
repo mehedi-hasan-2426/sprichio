@@ -8,6 +8,7 @@ import { Recorder } from "./Recorder.tsx";
 import { Rubric, SPEAKING_CRITERIA } from "./Rubric.tsx";
 import { WritingTask } from "./WritingTask.tsx";
 import { useProgress } from "../state/ProgressContext.tsx";
+import { groupScore } from "../lib/progress.ts";
 import { useState } from "react";
 
 export interface WritingRubric {
@@ -25,8 +26,15 @@ export function SectionView({ unit, section, rubric, idPrefix }: { unit: Unit; s
   });
   const levels = ["all", "core", "easy", "medium", "hard"].filter((value) => value === "all" || items.some((item) => (item.difficulty ?? "core") === value));
   if (section.role === "listening") return <ListeningSoon />;
+  const score = section.role === "quiz" ? groupScore(progress, items.map((item) => item.id)) : null;
   return (
     <>
+      {score ? (
+        <div className="scoreboard" aria-live="polite">
+          <p><strong>{score.correct}</strong> <span>right first time</span></p>
+          <p><strong>{score.done}/{score.total}</strong> <span>answered</span></p>
+        </div>
+      ) : null}
       {levels.length > 2 ? (
         <fieldset className="difficulty">
           <legend>Practice level</legend>
