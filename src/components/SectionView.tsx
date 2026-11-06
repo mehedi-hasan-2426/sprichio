@@ -1,11 +1,15 @@
 import type { Section, Unit, WritingTask as WritingTaskData } from "../lib/types.ts";
+import Link from "next/link";
 import { Blocks } from "./Blocks.tsx";
+import { GrammarLesson } from "./GrammarLesson.tsx";
+import { DialogueView } from "./DialogueView.tsx";
 import { ItemView } from "./ItemView.tsx";
 import { ListeningSoon } from "./ListeningSoon.tsx";
 import { Recorder } from "./Recorder.tsx";
 import { Rubric, SPEAKING_CRITERIA } from "./Rubric.tsx";
 import { WritingTask } from "./WritingTask.tsx";
 import { useProgress } from "../state/ProgressContext.tsx";
+import { groupScore } from "../lib/progress.ts";
 import { useState } from "react";
 
 export interface WritingRubric {
@@ -23,8 +27,15 @@ export function SectionView({ unit, section, rubric, idPrefix }: { unit: Unit; s
   });
   const levels = ["all", "core", "easy", "medium", "hard"].filter((value) => value === "all" || items.some((item) => (item.difficulty ?? "core") === value));
   if (section.role === "listening") return <ListeningSoon />;
+  const score = section.role === "quiz" ? groupScore(progress, items.map((item) => item.id)) : null;
   return (
     <>
+      {score ? (
+        <div className="scoreboard">
+          <p><strong>{score.correct}</strong> <span>right first time</span></p>
+          <p><strong>{score.done}/{score.total}</strong> <span>answered</span></p>
+        </div>
+      ) : null}
       {levels.length > 2 ? (
         <fieldset className="difficulty">
           <legend>Practice level</legend>
@@ -36,9 +47,23 @@ export function SectionView({ unit, section, rubric, idPrefix }: { unit: Unit; s
           ))}
         </fieldset>
       ) : null}
+      {section.role === "dialogue" && unit.dialogue ? <DialogueView dialogue={unit.dialogue} /> : null}
       <div lang={section.role === "reading" || section.role === "writing" ? "de" : undefined}>
         <Blocks blocks={section.blocks} items={unit.items} renderItem={(item) => level === "all" || (item.difficulty ?? "core") === level ? <ItemView item={item} /> : null} idPrefix={idPrefix} />
       </div>
+      {section.role === "grammar" && unit.grammarLesson ? (
+        <div className="topic-grammar">
+          <GrammarLesson lesson={unit.grammarLesson} />
+          {unit.grammarLinks?.length ? (
+            <section aria-labelledby="more-grammar" className="more-grammar">
+              <h2 id="more-grammar" className="grammar-h2">Practise more</h2>
+              <ul className="path-guides">
+                {unit.grammarLinks.map((link) => <li key={link.slug}><Link href={`/grammatik/${link.slug}`}>{link.title}</Link></li>)}
+              </ul>
+            </section>
+          ) : null}
+        </div>
+      ) : null}
       {section.role === "speaking" ? (
         <>
           <Recorder />

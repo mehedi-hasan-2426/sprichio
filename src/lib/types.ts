@@ -44,6 +44,7 @@ export interface Section {
 }
 
 export type SectionRole =
+  | "dialogue"
   | "vocab"
   | "grammar"
   | "exercises"
@@ -97,6 +98,32 @@ export interface Unit {
   writing: WritingTask[];
   notes: Record<string, Block[]>;
   shortDay: Inline[];
+  grammarLesson?: GrammarLesson;
+  grammarLinks?: { slug: string; title: string }[];
+  dialogue?: Dialogue;
+}
+
+export type Speaker = "anna" | "max";
+export type SceneName = "cafe" | "cafe-table" | "apartment" | "bakery" | "doctor" | "street" | "office" | "shop" | "park" | "station" | "counter";
+export type Mood = "smile" | "unsure" | "surprised";
+
+export interface DialogueLine {
+  who: Speaker;
+  de: string;
+  en: string;
+  mood?: Mood;
+}
+
+export interface Dialogue {
+  title: string;
+  titleEn: string;
+  scene: SceneName;
+  situation: string;
+  left: Speaker;
+  roles: Record<Speaker, string>;
+  lines: DialogueLine[];
+  words: [de: string, en: string][];
+  phrases: [de: string, en: string][];
 }
 
 export interface ExamPassage {
@@ -151,6 +178,26 @@ export interface Doc {
   blocks: Block[];
 }
 
+export type GrammarExample = [de: string, en: string];
+
+export type GrammarVisual =
+  | { kind: "table"; title: string; head: string[]; rows: string[][]; mark?: number[]; note?: string }
+  | { kind: "steps"; title: string; steps: [question: string, answer: string, example: string][] }
+  | { kind: "scene"; title: string; spots: [preposition: string, where: string, whereTo: string, whereEn: string, whereToEn: string][] };
+
+export interface GrammarPoint {
+  title: string;
+  text: string;
+  examples: GrammarExample[];
+}
+
+export interface GrammarLesson {
+  visuals: GrammarVisual[];
+  points: GrammarPoint[];
+  traps: [wrong: string, right: string, why: string][];
+  hook?: string;
+}
+
 export interface GrammarTopic {
   slug: string;
   title: string;
@@ -159,6 +206,7 @@ export interface GrammarTopic {
   summary: string;
   rule: string;
   source: string | null;
+  lesson: GrammarLesson | null;
   items: Item[];
 }
 

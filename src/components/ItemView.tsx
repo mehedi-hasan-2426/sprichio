@@ -177,7 +177,6 @@ export function ItemView({ item }: { item: Item }) {
         {!done ? (
           <>
             <label className="sr-only" htmlFor={id + "-t"}>Your answer</label>
-            <p className="muted">Self-check: several answers may be valid. Compare your answer with the example, or ask a tutor.</p>
             <textarea id={id + "-t"} lang="de" rows={2} maxLength={MAX_ANSWER_LENGTH} placeholder="Your answer (optional, only for you)" value={values[0] ?? ""} onChange={(e) => setValue(0, e.target.value)} />
             {!selfShown ? (
               <button type="button" onClick={() => setSelfShown(true)}>Show answer</button>

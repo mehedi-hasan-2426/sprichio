@@ -292,7 +292,7 @@ export function addWeeklyPractice(course: Course): Course {
     }
     reading.blocks.push(
       { kind: "h", text: [{ t: "Zusatztraining: eine Nachricht verstehen" }] },
-      { kind: "p", text: [{ t: "Lesen Sie die Nachricht. Antworten Sie auf Deutsch. Mehrere Antworten sind möglich. Vergleichen Sie Ihre Antwort mit dem Beispiel." }] },
+      { kind: "p", text: [{ t: "Lesen Sie die Nachricht. Antworten Sie auf Deutsch." }] },
       { kind: "quote", lines: [[{ t: addition.message }]] },
     );
     for (const [position, [prompt, model]] of addition.responses.entries()) {
@@ -301,7 +301,7 @@ export function addWeeklyPractice(course: Course): Course {
         id, n: position + 1, group: "Plus-hard", difficulty: "hard", prompt, kind: "open", blanks: 0,
         capStart: false, answers: [], display: model, tag: "WS",
         hint: "Find the relevant detail in the message, then write a short German response.",
-        rule: "Check the facts, the required points, verb position and polite wording. Other correct answers are possible.",
+        rule: "Check the facts, the required points, verb position and polite wording.",
       };
       reading.blocks.push({ kind: "item", itemId: id });
     }

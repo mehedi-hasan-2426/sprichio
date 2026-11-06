@@ -17,6 +17,7 @@ export interface NavWeek {
 }
 
 export const ROLE_LABEL: Record<string, string> = {
+  dialogue: "Conversation",
   vocab: "Vocabulary",
   grammar: "Grammar",
   exercises: "Grammar practice",

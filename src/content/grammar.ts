@@ -1,7 +1,12 @@
 import type { Course, GrammarTopic, Item, Category } from "../lib/types.ts";
+import { LESSONS } from "./grammar-lessons.ts";
+import { MORE_ROWS } from "./grammar-more.ts";
+import { PREPOSITION_TOPICS } from "./grammar-prepositions.ts";
 
-type Row = [prompt: string, answer: string | string[], options?: string[]];
-interface Topic {
+export type Row = [prompt: string, answer: string | string[], options?: string[]];
+export type Level = "easy" | "medium" | "hard";
+export type ExtraRow = [level: Level, prompt: string, answer: string | string[], options?: string[]];
+export interface Topic {
   slug: string;
   title: string;
   group: string;
@@ -12,7 +17,7 @@ interface Topic {
   rows: Row[];
 }
 
-const topics: Topic[] = [
+const core: Topic[] = [
   {
     slug: "cases/dative", title: "Dative case", group: "Cases", tag: "KA",
     summary: "Articles after dative verbs and prepositions.",
@@ -74,7 +79,7 @@ const topics: Topic[] = [
       ["Ich komme mit ___. (ihr, Plural)", "euch"],
       ["Schreiben Sie mit Pronomen: Ich helfe der Frau.", "Ich helfe ihr."],
       ["Schreiben Sie mit Pronomen: Wir danken den Freunden.", "Wir danken ihnen."],
-      ["Schreiben Sie mit Pronomen: Das Essen schmeckt dem Kind.", "Das Essen schmeckt ihm."],
+      ["Schreiben Sie mit Pronomen: Das Essen schmeckt dem Kind.", "Das Essen schmeckt ihm.|Es schmeckt ihm."],
     ],
   },
   {
@@ -166,7 +171,7 @@ const topics: Topic[] = [
       ["Früher ___ wir kein Auto. (haben)", "hatten", ["haben", "hatte", "hatten"]],
       ["Als Kind ___ sie gut schwimmen. (können)", "konnte", ["könnte", "konnte", "kann"]],
       ["Du ___ gestern krank. (sein)", "warst"],
-      ["Ich ___ am Samstag arbeiten. (müssen)", "musste"],
+      ["Ich ___ letzten Samstag arbeiten. (müssen)", "musste"],
       ["Ihr ___ keine Zeit. (haben)", "hattet"],
       ["Schreiben Sie im Präteritum: Wir sind müde.", "Wir waren müde."],
       ["Schreiben Sie im Präteritum: Er hat einen Termin.", "Er hatte einen Termin."],
@@ -453,7 +458,7 @@ const topics: Topic[] = [
       ["___ Sie mir bitte helfen?", "Könnten", ["Könntest", "Könnten", "Könnte"]],
       ["Du ___ mehr schlafen. (Rat)", "solltest", ["sollte", "sollten", "solltest"]],
       ["Ich ___ gern einen Termin vereinbaren.", "würde", ["wurde", "würde", "werden"]],
-      ["Wir ___ heute spazieren gehen. (Vorschlag mit können)", "könnten"],
+      ["Wir ___ heute spazieren gehen. (Vorschlag mit könnte)", "könnten"],
       ["Ihr ___ die Wörter wiederholen. (Rat mit sollen)", "solltet"],
       ["___ du bitte das Fenster schließen? (höflich mit können)", "Könntest"],
       ["Formulieren Sie höflich mit könnten: Helfen Sie mir bitte.", "Könnten Sie mir bitte helfen?"],
@@ -464,28 +469,44 @@ const topics: Topic[] = [
 ];
 
 const keys = ["a", "b", "c"];
+const rank: Record<Level, number> = { easy: 0, medium: 1, hard: 2 };
+const casesEnd = core.findIndex((topic) => topic.group !== "Cases");
+const topics: Topic[] = [...core.slice(0, casesEnd), ...PREPOSITION_TOPICS, ...core.slice(casesEnd)];
+
+function toItem(topic: Topic, index: number, level: Level, [prompt, answer, options]: Row): Item {
+  const sets = typeof answer === "string" ? answer.split("|").map((variant) => [variant]) : [answer];
+  const answers = sets[0] ?? [];
+  const blanks = (prompt.match(/___/g) ?? []).length;
+  const slug = topic.slug.replaceAll("/", "-");
+  if (blanks > 1 && answers.length !== blanks) throw new Error(`Invalid grammar exercise layout: ${slug}-${index + 1}`);
+  if (options && (typeof answer !== "string" || sets.length > 1 || !options.includes(answer) || new Set(options).size !== options.length)) throw new Error(`Invalid grammar choices: ${slug}-${index + 1}`);
+  return {
+    id: `gr-${slug}-${index + 1}`, n: index + 1, group: "Grammar", difficulty: level,
+    prompt, kind: options ? "choice" : "text", blanks: options ? 0 : blanks, capStart: !options && prompt.startsWith("___"),
+    ...(options ? { options: options.map((label, option) => ({ key: keys[option] ?? String(option), label })), correct: keys[options.indexOf(String(answer))] } : {}),
+    answers: sets, display: answers.join(" / "), tag: topic.tag,
+    hint: topic.rule, rule: topic.rule,
+  };
+}
 
 export function createGrammarTopics(): GrammarTopic[] {
-  return topics.map((topic) => ({
-    slug: topic.slug, title: topic.title, group: topic.group,
-    level: topic.extension ? "Extension" : "A2",
-    summary: topic.summary, rule: topic.rule,
-    source: ["Adjectives", "Requests and advice"].includes(topic.group) ? null : `https://studygerman.io/exercises/grammar/${topic.slug}`,
-    items: topic.rows.map(([prompt, answer, options], index): Item => {
-      const answers = typeof answer === "string" ? [answer] : answer;
-      const blanks = (prompt.match(/___/g) ?? []).length;
-      const slug = topic.slug.replaceAll("/", "-");
-      if (topic.rows.length !== 9 || (blanks > 1 && answers.length !== blanks)) throw new Error(`Invalid grammar exercise layout: ${slug}-${index + 1}`);
-      if (options && (typeof answer !== "string" || !options.includes(answer) || new Set(options).size !== options.length)) throw new Error(`Invalid grammar choices: ${slug}-${index + 1}`);
-      return {
-        id: `gr-${slug}-${index + 1}`, n: index + 1, group: "Grammar", difficulty: index < 3 ? "easy" : index < 6 ? "medium" : "hard",
-        prompt, kind: options ? "choice" : "text", blanks: options ? 0 : blanks, capStart: !options && prompt.startsWith("___"),
-        ...(options ? { options: options.map((label, option) => ({ key: keys[option] ?? String(option), label })), correct: keys[options.indexOf(String(answer))] } : {}),
-        answers: [answers], display: answers.join(" / "), tag: topic.tag,
-        hint: topic.rule, rule: topic.rule,
-      };
-    }),
-  }));
+  return topics.map((topic) => {
+    const third = topic.rows.length / 3;
+    const base = topic.rows.map((row, index) => toItem(topic, index, index < third ? "easy" : index < third * 2 ? "medium" : "hard", row));
+    const extra = (MORE_ROWS[topic.slug] ?? []).map(([level, ...row], index) => toItem(topic, topic.rows.length + index, level, row));
+    const items = [...base, ...extra]
+      .sort((a, b) => rank[a.difficulty ?? "hard"] - rank[b.difficulty ?? "hard"])
+      .map((item, index) => ({ ...item, n: index + 1 }));
+    if (items.length !== 15 || !Number.isInteger(third)) throw new Error(`Grammar topic needs 15 exercises: ${topic.slug}`);
+    return {
+      slug: topic.slug, title: topic.title, group: topic.group,
+      level: topic.extension ? "Extension" : "A2",
+      summary: topic.summary, rule: topic.rule,
+      source: ["Adjectives", "Requests and advice", "Prepositions"].includes(topic.group) ? null : `https://studygerman.io/exercises/grammar/${topic.slug}`,
+      lesson: LESSONS[topic.slug] ?? null,
+      items,
+    };
+  });
 }
 
 export function addGrammarPractice(course: Course): void {
@@ -494,7 +515,7 @@ export function addGrammarPractice(course: Course): void {
   if (overview) {
     overview.title = "Grammar exercises";
     overview.blocks = [
-      { kind: "p", text: [{ t: "Choose a grammar topic and practise at your own pace. Each topic includes an explanation, guided practice and sentence building." }] },
+      { kind: "p", text: [{ t: "Choose a grammar topic and practise at your own pace. Each topic explains the rule with translated examples, shows it in a table or picture, lists common mistakes and ends with 15 exercises from easy to hard." }] },
       { kind: "p", text: [{ t: "A2 topics form the core path. Extension topics include additional structures and are not presented as official A2 examination requirements." }] },
     ];
   }

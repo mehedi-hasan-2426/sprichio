@@ -6,7 +6,15 @@ import { gradeItem } from "../src/lib/grade.ts";
 import { weekSummaries } from "../src/server/load.ts";
 
 const course = JSON.parse(readFileSync(new URL("../content/generated/course.json", import.meta.url), "utf8")) as Course;
-const REQUIRED = ["vocab", "grammar", "exercises", "retrieval", "reading", "listening", "speaking", "pronunciation", "writing", "quiz"];
+const REQUIRED = ["vocab", "grammar", "exercises", "retrieval", "reading", "listening", "speaking", "writing", "quiz"];
+
+test("pronunciation lessons are gone and topics stay A2-only", () => {
+  for (const week of course.weeks) {
+    assert.ok(week.sections.every((s) => s.role !== "pronunciation"), week.id);
+    assert.ok(week.sections.every((s) => !/\bA1\b|Pronunciation/.test(s.title)), week.id);
+  }
+  assert.ok(course.docs.every((doc) => !/pronunciation/i.test(JSON.stringify(doc))));
+});
 
 test("every week covers all skills", () => {
   assert.equal(course.weeks.length, 12);
@@ -101,12 +109,14 @@ test("every week adds ten words and three exercises per difficulty without chang
   for (const unit of course.weeks) {
     const original = source.weeks.find((week) => week.id === unit.id);
     assert.ok(original);
-    assert.equal(Object.keys(unit.items).length, Object.keys(original.items).length + 9 + 30);
+    const dropped = new Set(original.sections.filter((s) => s.role === "pronunciation").flatMap((s) => s.blocks.flatMap((b) => b.kind === "item" ? [b.itemId] : [])));
+    const kept = Object.keys(original.items).filter((id) => !dropped.has(id));
+    assert.equal(Object.keys(unit.items).filter((id) => !/-(?:review|talk)-/.test(id)).length, kept.length + 9 + 30);
     assert.equal(course.vocab.filter((entry) => entry.id.startsWith(`${unit.id}-plus-word-`)).length, 10);
     for (const difficulty of ["easy", "medium", "hard"]) {
       assert.equal(Object.values(unit.items).filter((item) => item.difficulty === difficulty && item.id.includes("-plus-")).length, 3);
     }
-    for (const id of Object.keys(original.items)) assert.ok(unit.items[id], id);
+    for (const id of kept) assert.ok(unit.items[id], id);
     const terms = course.vocab.filter((entry) => entry.week === Number(unit.id.slice(1))).map((entry) => entry.term);
     assert.equal(new Set(terms).size, terms.length, unit.id);
   }

@@ -15,9 +15,9 @@ interface Props {
 
 const MAX = 56;
 const BANDS = [
-  { min: 0.82, text: "A1 secure: review topic 1, then choose your next topic." },
-  { min: 0.57, text: "A1 with gaps: follow the plan as it is. Watch the gaps on the Progress page." },
-  { min: 0, text: "A1 not yet secure: revisit topics 1 and 2 until you feel comfortable. There is no deadline." },
+  { min: 0.82, text: "Strong start: skim topic 1, then choose any topic you like." },
+  { min: 0.57, text: "Good base with a few gaps: work through the topics in order. Watch the gaps on the Progress page." },
+  { min: 0, text: "The basics need more practice: take topics 1 and 2 slowly and repeat them until they feel easy. There is no deadline." },
 ];
 
 export default function Placement({ unit, rubric, parts }: Props) {
