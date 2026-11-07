@@ -14,7 +14,7 @@ async function sectionLinks(page: Page, topic = 1) {
 
 async function noHorizontalScroll(page: Page) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  expect(overflow).toBeLessThanOrEqual(1);
+  expect(overflow, page.url()).toBeLessThanOrEqual(1);
 }
 
 test("guest sign-in control stays visible and stable while hovering", async ({ page }, testInfo) => {
@@ -273,6 +273,12 @@ test("grammar tables keep words readable on narrow screens", async ({ page }, te
     routes.push(grammar?.href ?? `/woche/${topic}`);
   }
   let foundVowelChange = false;
+  if (testInfo.project.name === "mobile") {
+    await page.setViewportSize({ width: 295, height: 851 });
+    await page.goto("/grammatik/prepositions/dative");
+    await noHorizontalScroll(page);
+    await page.getByRole("figure", { name: "Always dative", exact: true }).screenshot({ path: testInfo.outputPath("dative-prepositions-295.png") });
+  }
   for (const width of testInfo.project.name === "mobile" ? [320, 393] : [1280]) {
     await page.setViewportSize({ width, height: 851 });
     for (const route of routes) {
@@ -308,7 +314,7 @@ test("grammar tables keep words readable on narrow screens", async ({ page }, te
         await table.screenshot({ path: testInfo.outputPath(`vowel-change-${width}.png`) });
       }
       expect(broken, `${route} at ${width}px`).toEqual([]);
-      const tables = page.locator(".table-wrap").filter({ has: page.locator("table:not(.vocab-table)") });
+      const tables = page.locator(".table-wrap, .gv-scroll").filter({ has: page.locator("table:not(.vocab-table)") });
       for (const table of await tables.all()) {
         const reachable = await table.evaluate((wrapper) => {
           wrapper.scrollLeft = wrapper.scrollWidth;

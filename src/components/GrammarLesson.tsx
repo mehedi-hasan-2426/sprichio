@@ -27,7 +27,7 @@ function TableVisual({ visual }: { visual: Extract<GrammarVisual, { kind: "table
   return (
     <figure className="gv">
       <figcaption>{visual.title}</figcaption>
-      {isFrame ? <div className="gv-scroll" role="region" aria-label={visual.title} tabIndex={0}>{table}</div> : table}
+      <div className="gv-scroll" role="region" aria-label={visual.title} tabIndex={0}>{table}</div>
       {visual.note ? <p className="gv-note">{visual.note}</p> : null}
     </figure>
   );
