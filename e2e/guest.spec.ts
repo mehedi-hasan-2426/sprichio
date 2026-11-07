@@ -6,9 +6,9 @@ async function enterAsGuest(page: Page) {
   await page.waitForURL((url) => url.pathname === "/");
 }
 
-async function sectionLinks(page: Page) {
-  await page.goto("/woche/1");
-  const hrefs = await page.locator('a[href^="/woche/1/"]').evaluateAll((as) => as.map((a) => ({ href: a.getAttribute("href") ?? "", text: a.textContent ?? "" })));
+async function sectionLinks(page: Page, topic = 1) {
+  await page.goto(`/woche/${topic}`);
+  const hrefs = await page.locator(`a[href^="/woche/${topic}/"]`).evaluateAll((as) => as.map((a) => ({ href: a.getAttribute("href") ?? "", text: a.textContent ?? "" })));
   return [...new Map(hrefs.map((h) => [h.href, h])).values()];
 }
 
@@ -223,6 +223,67 @@ test("two-way prepositions switch between wo and wohin in the scene", async ({ p
   await noHorizontalScroll(page);
   await page.getByRole("link", { name: "Skip to the 15 exercises" }).click();
   await expect(page.getByRole("heading", { name: "Practice", exact: true })).toBeInViewport();
+});
+
+test("grammar tables keep words readable on narrow screens", async ({ page }, testInfo) => {
+  testInfo.setTimeout(120_000);
+  await enterAsGuest(page);
+  const routes = ["/material/grammatik"];
+  await page.goto(routes[0] ?? "/material/grammatik");
+  const lessons = await page.locator('a[href^="/grammatik/"]').evaluateAll((links) => [...new Set(links.map((link) => link.getAttribute("href") ?? ""))]);
+  expect(lessons.length).toBeGreaterThan(0);
+  routes.push(...lessons);
+  for (let topic = 1; topic <= 12; topic += 1) {
+    const grammar = (await sectionLinks(page, topic)).find((link) => /grammar|grammatik/i.test(link.text + link.href));
+    expect(grammar, `topic ${topic} grammar section`).toBeTruthy();
+    routes.push(grammar?.href ?? `/woche/${topic}`);
+  }
+  let foundVowelChange = false;
+  for (const width of testInfo.project.name === "mobile" ? [320, 393] : [1280]) {
+    await page.setViewportSize({ width, height: 851 });
+    for (const route of routes) {
+      await page.goto(route);
+      await noHorizontalScroll(page);
+      const broken = await page.locator("table:not(.vocab-table)").evaluateAll((tables) => {
+        const broken: string[] = [];
+        for (const table of tables) {
+          const walker = document.createTreeWalker(table, NodeFilter.SHOW_TEXT);
+          let node = walker.nextNode();
+          while (node) {
+            for (const word of (node.textContent ?? "").matchAll(/[\p{L}\p{M}]{2,}/gu)) {
+              const range = document.createRange();
+              range.setStart(node, word.index);
+              range.setEnd(node, word.index + word[0].length);
+              const lines = new Set(Array.from(range.getClientRects(), (rect) => Math.round(rect.top)));
+              if (lines.size > 1) broken.push(word[0]);
+            }
+            node = walker.nextNode();
+          }
+        }
+        return broken;
+      });
+      const heading = page.getByRole("heading", { name: /Present tense with a vowel change/i }).first();
+      if (await heading.count()) {
+        foundVowelChange = true;
+        const table = heading.locator("xpath=following-sibling::div[contains(@class, 'table-wrap')][1]");
+        await table.evaluate((element) => { element.scrollLeft = 0; });
+        await table.screenshot({ path: testInfo.outputPath(`vowel-change-${width}.png`) });
+      }
+      expect(broken, `${route} at ${width}px`).toEqual([]);
+      const tables = page.locator(".table-wrap").filter({ has: page.locator("table:not(.vocab-table)") });
+      for (const table of await tables.all()) {
+        const reachable = await table.evaluate((wrapper) => {
+          wrapper.scrollLeft = wrapper.scrollWidth;
+          const last = wrapper.querySelector("tr:last-child td:last-child");
+          const rect = wrapper.getBoundingClientRect();
+          const cell = last?.getBoundingClientRect();
+          return !cell || (cell.left >= rect.left - 1 && cell.right <= rect.right + 1);
+        });
+        expect(reachable, `${route} last column at ${width}px`).toBe(true);
+      }
+    }
+  }
+  expect(foundVowelChange, "reported vowel-change table was checked").toBe(true);
 });
 
 test("every grammar lesson fits the screen without sideways scrolling", async ({ page }) => {

@@ -245,7 +245,7 @@ main[id], section[id], h2[id], h3[id] { scroll-margin-top: 5rem; }
 .grammar-group { margin: 2rem 0 0; }
 .grammar-catalogue .lesson { grid-template-columns: minmax(0, 1fr); }
 .grammar-rule { border-left: 3px solid var(--teal); padding: 0.25rem 1rem; margin: 1.5rem 0; }
-.grammar-rule p { margin-bottom: 0; max-width: 44rem; }
+.grammar-rule p { margin-bottom: 0; max-width: 44rem; overflow-wrap: anywhere; }
 .jump { margin: 0.75rem 0 0; font-size: 0.92rem; }
 .grammar-h2 { margin: 2.5rem 0 0.25rem; }
 
@@ -554,8 +554,9 @@ fieldset.item { padding: 0.75rem 0; }
 .feedback.bad { background: var(--bad-bg); color: var(--bad-fg); }
 .feedback.neutral { background: var(--neutral-bg); }
 
-.table-wrap { overflow-x: auto; }
+.table-wrap { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
 .table-wrap td { white-space: pre-line; overflow-wrap: anywhere; }
+.table-wrap table:not(.vocab-table) td { overflow-wrap: normal; word-break: normal; }
 .difficulty { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; border: 0; border-bottom: 1px solid var(--line); padding: 0.5rem 0 1rem; margin: 0 0 1rem; }
 .difficulty legend { font-weight: 600; }
 .difficulty label { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 44px; cursor: pointer; }
