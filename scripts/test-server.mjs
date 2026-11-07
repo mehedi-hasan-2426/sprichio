@@ -126,7 +126,8 @@ try {
   const grammar = await request("/grammatik/cases/dative", firstCookie);
   assert.equal(grammar.status, 200);
   const grammarHtml = await grammar.text();
-  assert.ok(grammarHtml.includes("Dative case") && grammarHtml.includes("The rule in short") && grammarHtml.includes("Common mistakes"));
+  assert.ok(grammarHtml.includes("Dative case") && grammarHtml.includes("How it works") && grammarHtml.includes("Common mistakes"));
+  assert.ok(!grammarHtml.includes("The rule in short"));
   assert.ok(!grammarHtml.includes("Week 1") && !grammarHtml.includes("of 12"));
   const planHtml = await (await request("/plan", firstCookie)).text();
   assert.ok(planHtml.includes("Your learning path") && !/12.week|Week 1/.test(planHtml));

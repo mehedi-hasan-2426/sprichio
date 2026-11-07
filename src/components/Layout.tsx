@@ -48,7 +48,8 @@ function SyncIndicator({ status, retry }: { status: SyncStatus; retry: () => voi
 }
 
 export function Layout({ children, title }: { children: ReactNode; title?: string }) {
-  const { pathname } = useRouter();
+  const { asPath } = useRouter();
+  const path = asPath.split(/[?#]/)[0];
   const { guest, saved, ready, syncStatus, syncNow, cacheInvalid } = useProgress();
   const [leaving, setLeaving] = useState(false);
   const [logoutError, setLogoutError] = useState(false);
@@ -87,7 +88,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
         </Link>
         <nav aria-label="Main navigation">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={pathname === n.href ? "page" : undefined}>
+            <Link key={n.href} href={n.href} aria-current={path === n.href || (n.href === "/material/grammatik" && path?.startsWith("/grammatik/")) ? "page" : undefined}>
               <RoleIcon role={n.icon} className="nav-icon" />
               <span className="nav-label">{n.label}</span>
               <span className="nav-short">{n.short}</span>
@@ -97,7 +98,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
         <div className="account-actions">
           <ThemeToggle />
           {guest ? <span className="sync-status icon-only tip" data-tip="Guest: progress stays in this browser" role="status"><RoleIcon role="cloud" className="sync-icon" /><span className="sr-only">Guest: this browser only</span></span> : <SyncIndicator status={syncStatus} retry={() => { syncNow().catch(() => undefined); }} />}
-          {guest ? <Link className="button secondary sign-in-link" href="/signin">Sign in</Link> : null}
+          {guest ? <Link className="sign-in-link" href="/signin">Sign in</Link> : null}
           <button type="button" className="sign-out icon-only tip" data-tip={guest ? "Leave guest mode" : "Sign out"} aria-label={guest ? "Leave guest mode" : "Sign out"} onClick={leave} disabled={leaving}>
             <RoleIcon role="log-out" className="sync-icon" />
           </button>
