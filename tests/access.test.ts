@@ -32,6 +32,7 @@ test("relative home and sign-out callbacks stay on the configured origin", () =>
   assert.equal(safeAuthRedirect("/", base), base + "/");
   assert.equal(safeAuthRedirect(base, base), base + "/");
   assert.equal(safeAuthRedirect(base + "/", base), base + "/");
+  assert.equal(safeAuthRedirect("/learn", base), base + "/learn");
   assert.equal(safeAuthRedirect("/signin", base), base + "/signin");
   assert.equal(safeAuthRedirect("/woche/1?practice=easy#words", base), base + "/woche/1?practice=easy#words");
 });
@@ -42,5 +43,5 @@ test("authentication return URLs reject external, malformed and ambiguous target
     "https://evil.example/", "https://course.example.com.evil.example/", "//evil.example/", "//course.example.com/",
     "/\\evil.example/", "https://user:password@course.example.com/", "javascript:alert(1)", "data:text/html,test",
     "http://course.example.com/", "https://course.example.com:8443/", "not a URL", "", "/\n/evil.example/",
-  ]) assert.equal(safeAuthRedirect(target, base), base + "/signin", target);
+  ]) assert.equal(safeAuthRedirect(target, base), base + "/", target);
 });

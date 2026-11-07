@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 async function enterAsGuest(page: Page) {
-  await page.goto("/signin");
-  await page.getByRole("button", { name: "Continue as guest" }).click();
-  await page.waitForURL((url) => url.pathname === "/");
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start practising", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/learn");
 }
 
 async function sectionLinks(page: Page, topic = 1) {
@@ -85,21 +85,88 @@ test("guest sign-in control stays visible and stable while hovering", async ({ p
     }
   }
   await link.click();
-  await expect(page).toHaveURL(/\/signin$/);
-  await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
+  await expect(page).toHaveURL((url) => url.pathname === "/");
+  await expect(page.getByRole("button", { name: "Google sign-in", exact: true })).toBeVisible();
 });
 
-test("sign-in page renders particles and fits the screen", async ({ page }) => {
-  await page.goto("/signin");
-  await expect(page).toHaveTitle("Sign in · Sprichio");
-  await expect(page.locator(".logo-word")).toHaveText("Sprichio");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Deutsch lernen.");
-  await expect(page.locator("canvas.particles")).toBeAttached();
+test("public intro is indexable, interactive and private-data free", async ({ page, request }, testInfo) => {
+  const apiRequests: string[] = [];
+  page.on("request", (sent) => { if (new URL(sent.url()).pathname.startsWith("/api/")) apiRequests.push(sent.url()); });
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  await expect(page).toHaveTitle("Sprichio | Deutsch lernen und online üben");
+  await expect(page.locator(".logo-word").first()).toHaveText("Sprichio");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sprichio");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://sprichio.de/");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
+  await expect(page.locator('meta[name="description"]')).toHaveCount(1);
+  await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
+  await expect(page.locator(".landing")).not.toContainText("A2");
+  await expect(page.locator("canvas.particles, .signin-screen, .signin-content")).toHaveCount(0);
+  const bootstrap = JSON.parse(await page.locator("#__NEXT_DATA__").textContent() ?? "{}") as { props: { pageProps: Record<string, unknown> } };
+  expect(Object.keys(bootstrap.props.pageProps).sort()).toEqual(["configured", "denied"]);
+  const privateRoute = await request.get("/learn", { maxRedirects: 0 });
+  expect(privateRoute.status()).toBe(307);
+  expect(privateRoute.headers().location).toBe("/");
+  expect(privateRoute.headers()["x-robots-tag"]).toContain("noindex");
+  const sitemap = await (await request.get("/sitemap.xml")).text();
+  const locations = await page.evaluate((xml) => {
+    const parsed = new DOMParser().parseFromString(xml, "application/xml");
+    if (parsed.querySelector("parsererror")) throw new Error("Invalid sitemap XML");
+    return Array.from(parsed.getElementsByTagName("loc"), (node) => node.textContent);
+  }, sitemap);
+  expect(locations).toEqual(["https://sprichio.de/"]);
+  const hero = page.locator(".landing-hero");
+  expect(await hero.evaluate((element) => getComputedStyle(element).backgroundImage)).toContain("landing-bg");
   await noHorizontalScroll(page);
+  await page.screenshot({ path: testInfo.outputPath("intro-light.png"), fullPage: true });
+  await page.getByRole("switch", { name: "Dark mode" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-appearance", "dark");
+  await page.screenshot({ path: testInfo.outputPath("intro-dark.png"), fullPage: true });
+  await page.getByRole("button", { name: "bei", exact: true }).click();
+  await expect(page.locator(".landing-answer")).toContainText("Not quite");
+  await page.getByRole("button", { name: "mit", exact: true }).click();
+  await expect(page.locator(".landing-answer")).toContainText("Richtig");
+  await expect(page.locator(".landing-gap")).toHaveText("mit");
+  expect(apiRequests).toEqual([]);
+  if (testInfo.project.name === "mobile") {
+    await page.setViewportSize({ width: 320, height: 740 });
+    await noHorizontalScroll(page);
+    await page.screenshot({ path: testInfo.outputPath("intro-320.png"), fullPage: true });
+  } else {
+    await page.setViewportSize({ width: 820, height: 900 });
+    await noHorizontalScroll(page);
+    await page.screenshot({ path: testInfo.outputPath("intro-tablet.png"), fullPage: true });
+  }
+});
+
+test("guest entry failures keep the intro usable", async ({ page }) => {
+  await page.route("**/api/guest", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start practising", exact: true }).click();
+  await expect(page.locator(".landing").getByRole("alert")).toContainText("your saved progress has not changed");
+  await expect(page.getByRole("button", { name: "Start practising", exact: true })).toBeEnabled();
+  await expect(page).toHaveURL((url) => url.pathname === "/");
+});
+
+test("guest practice survives returning to the public intro", async ({ page }) => {
+  await enterAsGuest(page);
+  await page.goto("/woche/2/gespraech");
+  await page.getByRole("button", { name: "Show all" }).click();
+  const item = page.locator("fieldset.item").first();
+  await item.getByRole("button").first().click();
+  await expect(item.locator(".feedback")).toBeVisible();
+  const feedback = await item.locator(".feedback").textContent();
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start practising", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/learn");
+  await page.goto("/woche/2/gespraech");
+  await page.getByRole("button", { name: "Show all" }).click();
+  await expect(page.locator("fieldset.item").first().locator(".feedback")).toHaveText(feedback ?? "");
 });
 
 test("Sprichio icons have transparent corners and visible pixels", async ({ page }) => {
-  await page.goto("/signin");
+  await page.goto("/");
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute("href", "/favicon.svg");
   await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "Sprichio");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", "https://sprichio.de/og-image.jpg");
@@ -125,14 +192,15 @@ test("Sprichio icons have transparent corners and visible pixels", async ({ page
     expect(icon.visible, icon.path).toBe(true);
   }
   await noHorizontalScroll(page);
-  await page.screenshot({ path: test.info().outputPath("sprichio-signin.png"), fullPage: true });
+  await page.screenshot({ path: test.info().outputPath("sprichio-intro.png"), fullPage: true });
 });
 
-test("particles stay off with reduced motion", async ({ page }) => {
+test("public intro stays still with reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/signin");
-  const drawn = await page.locator("canvas.particles").evaluate((c: HTMLCanvasElement) => c.width > 300 && c.height > 150);
-  expect(drawn).toBe(false);
+  await page.goto("/");
+  await expect(page.locator("canvas")).toHaveCount(0);
+  expect(await page.locator(".landing-hero").evaluate((element) => getComputedStyle(element).animationName)).toBe("none");
+  await noHorizontalScroll(page);
 });
 
 test("guest can open week 1 and gap fields keep their width while typing", async ({ page }) => {
@@ -254,7 +322,7 @@ test("Practise more keeps Grammar selected inside lessons", async ({ page }, tes
   }
   await page.goto("/material/grammatik");
   await expect(grammarTab).toHaveAttribute("aria-current", "page");
-  await page.goto("/");
+  await page.goto("/learn");
   await expect(grammarTab).not.toHaveAttribute("aria-current", "page");
   await expect(navigation.getByRole("link", { name: "Today", exact: true })).toHaveAttribute("aria-current", "page");
 });

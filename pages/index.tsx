@@ -1,120 +1,123 @@
+import Head from "next/head";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { protect } from "../src/server/protect.ts";
-import { Layout } from "../src/components/Layout.tsx";
-import { loadCourse, weekSummaries } from "../src/server/load.ts";
-import { currentWeek, ROLE_LABEL } from "../src/lib/weeks.ts";
-import type { WeekSummary } from "../src/lib/weeks.ts";
-import { useProgress } from "../src/state/ProgressContext.tsx";
-import { dayKey, dueCards, newCardAllowance, newPerDay, addDays } from "../src/lib/leitner.ts";
-import { groupScore, streak } from "../src/lib/progress.ts";
-import { suggest } from "../src/lib/tags.ts";
+import type { GetServerSideProps } from "next";
+import { authConfigured } from "../src/server/auth.ts";
+import { Logo } from "../src/components/Logo.tsx";
+import { ThemeToggle } from "../src/components/ThemeToggle.tsx";
 
 interface Props {
-  weeks: WeekSummary[];
-  placementIds: string[];
-  roleOrder: string[];
+  configured: boolean;
+  denied: boolean;
 }
 
-export default function Home({ weeks, placementIds, roleOrder }: Props) {
-  const { progress, ready } = useProgress();
-  const [now] = useState(() => Date.now());
-  const today = dayKey(new Date(now));
-  const due = dueCards(progress.cards, today).length;
-  const introduced = progress.newCards.day === today ? progress.newCards.count : 0;
-  const fresh = newCardAllowance(due, introduced, newPerDay(progress.settings));
-  const placement = groupScore(progress, placementIds);
-  const week = currentWeek(weeks, progress);
-  const nextRole = week ? roleOrder.find((r) => {
-    const ids = week.ids[r] ?? [];
-    return ids.length && groupScore(progress, ids).done < ids.length;
-  }) : undefined;
-  const tips = suggest(progress.mistakes, now);
-  const days = streak(progress.days, today, addDays(today, -1));
+export default function Introduction({ configured, denied }: Props) {
+  const [pending, setPending] = useState<"guest" | "google" | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [answer, setAnswer] = useState<string | null>(null);
+  const correct = answer === "mit";
+
+  const enter = async (mode: "guest" | "google") => {
+    if (pending) return;
+    setPending(mode);
+    setFailed(false);
+    try {
+      if (mode === "google") {
+        await signIn("google", { callbackUrl: "/learn" });
+        return;
+      }
+      const response = await fetch("/api/guest", { method: "POST", headers: { "x-sprungbrett-guest": "1" } });
+      if (!response.ok) throw new Error("Guest access unavailable");
+      window.location.assign("/learn");
+    } catch {
+      setFailed(true);
+      setPending(null);
+    }
+  };
 
   return (
-    <Layout>
-      <h1>Today</h1>
-      <p className="muted">Your plan for today. Check the save status above before switching devices.</p>
-      {!ready ? <p className="muted">Loading progress …</p> : null}
-      <div className="grid">
-        {placement.done < placement.total ? (
-          <section className="card highlight">
-            <h2>1. Placement test</h2>
-            <p>Start with the placement test. It shows what you already know well ({placement.done} / {placement.total} exercises).</p>
-            <Link className="button" href="/einstufung">Start the placement test</Link>
-          </section>
-        ) : null}
-        <section className="card">
-          <h2>Flashcards</h2>
-          <p>
-            {due} due · {fresh} new allowed
-          </p>
-          <p className="muted">10 minutes. Reviews after 1, 3, 7, 14 and 30 days.</p>
-          <Link className="button" href="/karten">Practise cards</Link>
+    <div className="landing" id="top">
+      <Head>
+        <title>Sprichio | Deutsch lernen und online üben</title>
+        <meta name="description" key="description" content="Deutsch üben mit Sprichio: Grammatik, Wortschatz und Gespräche aus dem Alltag. Probiere eine Übung aus und lerne ohne Konto als Gast." />
+        <link rel="canonical" href="https://sprichio.de/" />
+        <meta name="robots" content={denied ? "noindex, follow" : "index, follow"} />
+        <meta property="og:title" key="og-title" content="Sprichio | Deutsch für deinen Alltag" />
+        <meta property="og:description" key="og-description" content="Grammatik, Wörter und Alltagssituationen. Dein nächster deutscher Satz beginnt hier." />
+        <meta property="og:url" content="https://sprichio.de/" />
+      </Head>
+      <a className="skip" href="#main">Skip to content</a>
+      <header className="landing-nav">
+        <Link href="/" className="brand" aria-label="Sprichio home"><Logo /></Link>
+        <nav aria-label="Introduction"><a href="#try-it">Try a sentence</a><a href="#privacy">Your privacy</a><ThemeToggle /></nav>
+      </header>
+      <main id="main" className="landing-main">
+        <section className="landing-hero" aria-labelledby="intro-title">
+          <div className="landing-hero-content">
+            <h1 id="intro-title">Sprichio</h1>
+            <p className="landing-offer" lang="de">Deutsch für deinen Alltag</p>
+            <p className="landing-lede">Find the words for your next conversation.</p>
+            <div className="landing-actions">
+              <button type="button" disabled={pending !== null} onClick={() => { void enter("guest"); }}>{pending === "guest" ? "Opening practice…" : "Start practising"}</button>
+              <button type="button" className="secondary" disabled={!configured || pending !== null} onClick={() => { void enter("google"); }}>{pending === "google" ? "Opening Google…" : "Google sign-in"}</button>
+            </div>
+            <p className="landing-entry-note">No account needed. Guest progress stays in this browser.</p>
+            {!configured ? <p className="landing-status">Google sign-in is unavailable here. Guest practice is available.</p> : null}
+            {denied ? <p className="landing-status" role="alert">Sign-in did not complete or this account is not approved. Try again or continue as a guest.</p> : null}
+            {failed ? <p className="landing-status" role="alert">Could not start. Please try again; your saved progress has not changed.</p> : null}
+          </div>
+          <a className="landing-hero-caption" href="#try-it">Ein kleiner Anfang <span aria-hidden="true">↓</span></a>
         </section>
-        {week ? (
-          <section className="card">
-            <h2>{week.title}</h2>
-            <p>{nextRole ? <>Continue with: <strong>{ROLE_LABEL[nextRole]}</strong></> : "Exercises done – don't forget speaking and writing."}</p>
-            <Link className="button" href={`/woche/${week.n}`}>Open topic {week.n}</Link>
-          </section>
-        ) : null}
-        <section className="card">
-          <h2>Tired? Short day</h2>
-          <p>15 minutes: cards and three sentences said aloud. A short day counts.</p>
-          <Link className="button secondary" href="/kurz">Start a short day</Link>
+        <section className="landing-practice landing-section" id="try-it" aria-labelledby="cafe-heading">
+          <div className="landing-practice-context">
+            <h2 id="cafe-heading" lang="de">Im Café</h2>
+            <p>Small words make a sentence yours.</p>
+            <p className="landing-dialogue" lang="de">„Was möchtest du trinken?“<br />„Einen Kaffee mit Milch, bitte.“</p>
+            <p className="landing-translation">“What would you like to drink?”<br />“A coffee with milk, please.”</p>
+          </div>
+          <div className="landing-exercise">
+            <p className="landing-question" lang="de">Einen Kaffee <span className="landing-gap">{correct ? "mit" : "___"}</span> Milch, bitte.</p>
+            <fieldset className="landing-choices">
+              <legend>Which word means “with”?</legend>
+              {["bei", "mit", "für"].map((word) => <button type="button" key={word} lang="de" className={`secondary${answer === word ? " selected" : ""}`} aria-pressed={answer === word} onClick={() => setAnswer(word)}>{word}</button>)}
+            </fieldset>
+            <div className="landing-answer" aria-live="polite">
+              {answer ? <p>{correct ? <><strong lang="de">Richtig.</strong> <span lang="de">Mit Milch</span> means “with milk”. <span lang="de">Ohne Milch</span> means “without milk”.</> : <>Not quite. You want coffee <strong>with</strong> milk. Try another word.</>}</p> : null}
+            </div>
+            <dl className="landing-words">
+              <div><dt lang="de">der Kaffee</dt><dd>coffee</dd></div>
+              <div><dt lang="de">die Milch</dt><dd>milk</dd></div>
+              <div><dt lang="de">bitte</dt><dd>please</dd></div>
+            </dl>
+          </div>
         </section>
-      </div>
-
-      <section className="card">
-        <h2>Tips for you</h2>
-        {tips.length ? (
-          <ul>
-            {tips.map((t) => (
-              <li key={t.tag}>
-                <strong>{t.info.label}</strong>: {t.count} mistakes in the last 30 days. Practise:{" "}
-                {t.info.practice.map((pr, k) => (
-                  <span key={pr.href}>
-                    {k ? ", " : ""}
-                    <Link href={pr.href}>{pr.label}</Link>
-                  </span>
-                ))}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="muted">No focus areas yet. When the same type of mistake happens three times, I'll suggest an exercise here.</p>
-        )}
-        <p className="muted">Study days in a row: {days}</p>
-      </section>
-
-      <section className="card">
-        <h2>Everyday topics</h2>
-        <ol className="weeks">
-          {weeks.map((w) => {
-            const all = Object.values(w.ids).flat();
-            const s = groupScore(progress, all);
-            return (
-              <li key={w.n}>
-                <Link href={`/woche/${w.n}`}>{w.title.replace(/^Topic \d+: /, "")}</Link>{" "}
-                <meter min={0} max={s.total || 1} value={s.done} aria-label={`Topic ${w.n} done`} /> <span className="muted">{s.done}/{s.total}</span>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
-    </Layout>
+        <section className="landing-path landing-section" aria-labelledby="practice-heading">
+          <h2 id="practice-heading" lang="de">Wörter finden. Sätze verstehen.</h2>
+          <div className="landing-path-copy">
+            <p>Practise grammar, build your vocabulary and work through everyday conversations. Read, write and return to the words that need another look.</p>
+            <p>Choose a topic, pick up where you left off and take the next sentence at your own pace.</p>
+            <button type="button" disabled={pending !== null} onClick={() => { void enter("guest"); }}>Open practice</button>
+          </div>
+        </section>
+        <section className="landing-privacy landing-section" id="privacy" aria-labelledby="privacy-heading">
+          <h2 id="privacy-heading">Your learning stays yours</h2>
+          <div className="landing-privacy-copy">
+            <p>As a guest, progress is saved only in this browser. Clearing browser data removes it; you can export a backup from the Progress page.</p>
+            <p>Google sign-in is limited to approved accounts. Signed-in progress is stored privately. Guest work is never automatically uploaded or assigned to an account.</p>
+            <p>No advertising trackers. No account required to start practising.</p>
+          </div>
+        </section>
+      </main>
+      <footer className="landing-footer"><Logo /><p lang="de">Ein Satz nach dem anderen.</p><a href="#top">Back to top</a></footer>
+    </div>
   );
 }
 
-export const getServerSideProps = protect<Props>(() => {
-  const course = loadCourse();
-  return {
-    props: {
-      weeks: weekSummaries(course),
-      placementIds: Object.values(course.placement.items).filter((i) => i.kind !== "open" && !i.id.startsWith("p-b")).map((i) => i.id),
-      roleOrder: ["dialogue", "exercises", "retrieval", "reading", "quiz"],
-    },
-  };
-});
+export const getServerSideProps: GetServerSideProps<Props> = async ({ res, query }) => {
+  res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+  if (typeof query.error === "string" && query.error !== "signin") {
+    return { redirect: { destination: "/?error=signin", permanent: false } };
+  }
+  return { props: { configured: authConfigured(), denied: typeof query.error === "string" } };
+};

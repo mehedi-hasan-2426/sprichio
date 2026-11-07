@@ -50,16 +50,22 @@ try {
     child.once("error", (error) => { clearTimeout(timer); reject(error); });
     child.once("exit", (code) => { clearTimeout(timer); reject(new Error(`Production server exited: ${code}`)); });
   });
-  const signInHtml = await (await fetch(origin + "/signin")).text();
-  const bootstrap = signInHtml.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/)?.[1];
-  assert.ok(bootstrap, "Sign-in page has no Next bootstrap data");
-  assert.ok(signInHtml.includes("Continue with Google") && signInHtml.includes("Continue as guest"));
-  assert.ok(signInHtml.includes("signin-screen") && !signInHtml.includes("A1 → A2"));
-  const { buildId } = JSON.parse(bootstrap);
+  const introResponse = await fetch(origin + "/");
+  assert.equal(introResponse.status, 200);
+  const introHtml = await introResponse.text();
+  const bootstrap = introHtml.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(bootstrap, "Public intro has no Next bootstrap data");
+  assert.ok(introHtml.includes("Start practising") && introHtml.includes("Google sign-in"));
+  assert.ok(introHtml.includes('id="intro-title"') && !introHtml.includes("A2"));
+  assert.ok(introHtml.includes('rel="canonical" href="https://sprichio.de/"'));
+  assert.ok(!introHtml.includes('name="robots" content="noindex'));
+  assert.equal(introResponse.headers.getSetCookie().length, 0);
+  const { buildId, props: { pageProps } } = JSON.parse(bootstrap);
+  assert.deepEqual(Object.keys(pageProps).sort(), ["configured", "denied"]);
   assert.match(buildId, /^[A-Za-z0-9_-]{1,128}$/);
   const reading = { id: "5-lesen" };
   const vocab = { id: "1-wortschatz" };
-  const routes = ["/", "/karten", "/fortschritt", "/info", "/plan", "/einstufung", "/artikel", "/kurz", "/checkpoint/1", "/material/wortschatz", "/material/grammatik", "/grammatik/cases/dative", "/woche/1", `/woche/1/${reading.id}`, `/_next/data/${buildId}/woche/1.json`, `/_next/data/${buildId}/woche/1/${reading.id}.json`, `/_next/data/${buildId}/grammatik/cases/dative.json`];
+  const routes = ["/learn", "/karten", "/fortschritt", "/info", "/plan", "/einstufung", "/artikel", "/kurz", "/checkpoint/1", "/material/wortschatz", "/material/grammatik", "/grammatik/cases/dative", "/woche/1", `/woche/1/${reading.id}`, `/_next/data/${buildId}/learn.json`, `/_next/data/${buildId}/woche/1.json`, `/_next/data/${buildId}/woche/1/${reading.id}.json`, `/_next/data/${buildId}/grammatik/cases/dative.json`];
   const cookie = async (overrides = {}) => {
     const token = await encode({ secret, maxAge: 8 * 60 * 60, token: { sub: "synthetic-first", email: "first@example.com", provider: "google", verified: true, signedInAt: Date.now(), ...overrides } });
     return `__Secure-next-auth.session-token=${token}`;
@@ -70,10 +76,24 @@ try {
     const body = await response.text();
     assert.match(response.headers.get("cache-control") ?? "", /private.*no-store/);
     assert.ok([200, 307].includes(response.status), `Unexpected denied response: ${path} ${response.status}`);
-    assert.ok(response.headers.get("location") === "/signin" || body.includes('"__N_REDIRECT":"/signin"'), `Access not denied: ${path}`);
+    assert.ok(response.headers.get("location") === "/" || body.includes('"__N_REDIRECT":"/"'), `Access not denied: ${path}`);
+    assert.match(response.headers.get("x-robots-tag") ?? "", /noindex/);
     assert.ok(!body.includes("Zusatztraining") && !body.includes("Mein Alltag beginnt früh."), `Course content leaked: ${path}`);
   };
   for (const route of routes) await denied(route);
+  const publicData = await (await request(`/_next/data/${buildId}/index.json`)).json();
+  assert.deepEqual(Object.keys(publicData.pageProps).sort(), ["configured", "denied"]);
+  const sitemap = await (await request("/sitemap.xml")).text();
+  assert.equal((sitemap.match(/<loc>/g) ?? []).length, 1);
+  assert.ok(sitemap.includes("<loc>https://sprichio.de/</loc>") && !sitemap.includes("/learn"));
+  const robots = await (await request("/robots.txt")).text();
+  assert.ok(robots.includes("Sitemap: https://sprichio.de/sitemap.xml") && robots.includes("Disallow: /api/"));
+  const legacy = await request("/signin");
+  assert.equal(legacy.status, 307);
+  assert.equal(legacy.headers.get("location"), "/");
+  const errorPage = await (await request("/?error=untrusted-secret-text")).text();
+  assert.ok(!errorPage.includes("untrusted-secret-text"));
+  console.log("PASS public intro and its data expose only public props; sitemap lists only the intro; legacy entry and errors stay safe");
   console.log(`PASS anonymous access blocked for ${routes.length} page/data routes`);
   assert.equal((await request("/api/guest")).status, 405);
   const foreignGuest = await fetch(origin + "/api/guest", { method: "POST", headers: { origin: "https://evil.example", "x-sprungbrett-guest": "1" } });
@@ -103,7 +123,7 @@ try {
   assert.equal(leftGuest.status, 204);
   assert.match(leftGuest.headers.getSetCookie()[0], /Max-Age=0/);
   await denied("/woche/1", "sprungbrett.guest=0");
-  console.log(`PASS centered sign-in offers guest entry; guests read ${routes.length} course/data routes but cannot read or write account progress`);
+  console.log(`PASS intro offers explicit guest entry; guests read ${routes.length} course/data routes but cannot read or write account progress`);
   for (const payload of [
     { email: "other@example.com" }, { email: "first+alias@example.com" }, { verified: false },
     { provider: "other" }, { signedInAt: Date.now() - 8 * 60 * 60 * 1000 }, { signedInAt: Date.now() + 60_000 },
@@ -137,17 +157,20 @@ try {
     assert.equal(signIn.status, 307);
     assert.equal(signIn.headers.get("location"), "/");
     assert.match(signIn.headers.get("cache-control") ?? "", /private.*no-store/);
-    const home = await request("/", active);
+    const home = await request("/learn", active);
     assert.equal(home.status, 200);
     assert.match(await home.text(), /<h1>Today<\/h1>/);
   }
   for (const inactive of [undefined, await cookie({ email: "other@example.com" }), await cookie({ signedInAt: Date.now() - 8 * 60 * 60 * 1000 })]) {
     const signIn = await request("/signin", inactive);
-    assert.equal(signIn.status, 200);
-    assert.ok((await signIn.text()).includes("Continue with Google"));
+    assert.equal(signIn.status, 307);
+    assert.equal(signIn.headers.get("location"), "/");
+    const intro = await request("/", inactive);
+    assert.equal(intro.status, 200);
+    assert.ok((await intro.text()).includes("Google sign-in"));
   }
-  console.log("PASS approved sessions leave sign-in for home; anonymous, disallowed and expired sessions keep the sign-in form");
-  for (const [target, expected] of [["/", "/"], ["/signin", "/signin"], ["https://evil.example/", "/signin"], ["//evil.example/", "/signin"]]) {
+  console.log("PASS approved accounts reach the private dashboard; legacy sign-in redirects all visitors to the public intro");
+  for (const [target, expected] of [["/", "/"], ["/learn", "/learn"], ["/signin", "/signin"], ["https://evil.example/", "/"], ["//evil.example/", "/"]]) {
     const response = await request("/api/auth/csrf?callbackUrl=" + encodeURIComponent(target));
     assert.equal(response.status, 200);
     const callback = response.headers.getSetCookie().find((value) => value.split("=")[0].endsWith("callback-url"));

@@ -2,7 +2,7 @@
   "name": "sprichio",
   "version": "0.1.0",
   "private": true,
-  "description": "Sprichio: a privacy-first German A2 practice app with instant feedback",
+  "description": "Sprichio: German practice with grammar, vocabulary and everyday conversations",
   "license": "MIT",
   "type": "module",
   "engines": {

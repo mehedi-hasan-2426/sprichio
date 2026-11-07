@@ -12,7 +12,7 @@ import { RoleIcon } from "./RoleIcon.tsx";
 import type { SyncStatus } from "../lib/progress-sync.ts";
 
 const NAV = [
-  { href: "/", label: "Today", short: "Today", icon: "today" },
+  { href: "/learn", label: "Today", short: "Today", icon: "today" },
   { href: "/plan", label: "Topics", short: "Topics", icon: "path" },
   { href: "/karten", label: "Flashcards", short: "Cards", icon: "cards" },
   { href: "/artikel", label: "der/die/das", short: "Articles", icon: "article" },
@@ -60,7 +60,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
       if (guest) {
         const response = await fetch("/api/guest", { method: "DELETE", headers: { "x-sprungbrett-guest": "1" } });
         if (!response.ok) throw new Error("Could not leave guest mode");
-        window.location.assign("/signin");
+        window.location.assign("/");
         return;
       }
       const synced = await syncNow();
@@ -68,7 +68,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
         setLeaving(false);
         return;
       }
-      await signOut({ callbackUrl: "/signin" });
+      await signOut({ callbackUrl: "/" });
     } catch {
       setLogoutError(true);
       setLeaving(false);
@@ -78,12 +78,13 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
     <>
       <Head>
         <title>{title ? `${title} · Sprichio` : "Sprichio · Deutsch lernen"}</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
       <a className="skip" href="#main">
         Skip to content
       </a>
       <header className="top">
-        <Link href="/" className="brand" aria-label="Sprichio home">
+        <Link href="/learn" className="brand" aria-label="Sprichio home">
           <Logo />
         </Link>
         <nav aria-label="Main navigation">
@@ -98,7 +99,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
         <div className="account-actions">
           <ThemeToggle />
           {guest ? <span className="sync-status icon-only tip" data-tip="Guest: progress stays in this browser" role="status"><RoleIcon role="cloud" className="sync-icon" /><span className="sr-only">Guest: this browser only</span></span> : <SyncIndicator status={syncStatus} retry={() => { syncNow().catch(() => undefined); }} />}
-          {guest ? <Link className="sign-in-link" href="/signin">Sign in</Link> : null}
+          {guest ? <Link className="sign-in-link" href="/">Sign in</Link> : null}
           <button type="button" className="sign-out icon-only tip" data-tip={guest ? "Leave guest mode" : "Sign out"} aria-label={guest ? "Leave guest mode" : "Sign out"} onClick={leave} disabled={leaving}>
             <RoleIcon role="log-out" className="sync-icon" />
           </button>
