@@ -20,7 +20,6 @@ export default function GrammarPage({ topic, previous, next }: Props) {
     <p className="lede">{topic.summary}</p>
     <p className="jump"><a href="#practice">Skip to the {topic.items.length} exercises</a></p>
     {topic.level === "Extension" ? <p className="feedback neutral">Optional extension. This topic goes beyond the core A2 learning path and is not presented as an official A2 examination requirement.</p> : null}
-    <section className="grammar-rule" aria-labelledby="rule-heading"><h2 id="rule-heading">The rule in short</h2><p>{topic.rule}</p></section>
     {topic.lesson ? <GrammarLesson lesson={topic.lesson} /> : null}
     <section aria-labelledby="practice" className="grammar-practice">
       <h2 id="practice" className="grammar-h2">Practice</h2>

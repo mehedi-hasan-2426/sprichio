@@ -48,7 +48,8 @@ function SyncIndicator({ status, retry }: { status: SyncStatus; retry: () => voi
 }
 
 export function Layout({ children, title }: { children: ReactNode; title?: string }) {
-  const { pathname } = useRouter();
+  const { asPath } = useRouter();
+  const path = asPath.split(/[?#]/)[0];
   const { guest, saved, ready, syncStatus, syncNow, cacheInvalid } = useProgress();
   const [leaving, setLeaving] = useState(false);
   const [logoutError, setLogoutError] = useState(false);
@@ -87,7 +88,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
         </Link>
         <nav aria-label="Main navigation">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={pathname === n.href ? "page" : undefined}>
+            <Link key={n.href} href={n.href} aria-current={path === n.href || (n.href === "/material/grammatik" && path?.startsWith("/grammatik/")) ? "page" : undefined}>
               <RoleIcon role={n.icon} className="nav-icon" />
               <span className="nav-label">{n.label}</span>
               <span className="nav-short">{n.short}</span>

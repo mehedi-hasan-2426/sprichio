@@ -225,6 +225,40 @@ test("two-way prepositions switch between wo and wohin in the scene", async ({ p
   await expect(page.getByRole("heading", { name: "Practice", exact: true })).toBeInViewport();
 });
 
+test("Practise more keeps Grammar selected inside lessons", async ({ page }, testInfo) => {
+  await enterAsGuest(page);
+  const grammar = (await sectionLinks(page, 6)).find((link) => /grammar|grammatik/i.test(link.text + link.href));
+  expect(grammar).toBeTruthy();
+  const topicRoute = grammar?.href ?? "/woche/6";
+  await page.goto(topicRoute);
+  const links = await page.locator(".more-grammar a").evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href") ?? ""));
+  expect(links.length).toBeGreaterThan(0);
+  const navigation = page.getByRole("navigation", { name: "Main navigation" });
+  const grammarTab = navigation.getByRole("link", { name: "Grammar", exact: true });
+  for (const width of testInfo.project.name === "mobile" ? [393] : [820, 1280]) {
+    await page.setViewportSize({ width, height: 851 });
+    for (const [index, href] of links.entries()) {
+      await page.goto(topicRoute);
+      await page.locator(".more-grammar a").nth(index).click();
+      await expect(page).toHaveURL((url) => url.pathname === href);
+      await expect(grammarTab).toHaveAttribute("aria-current", "page");
+      await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
+      await expect(page.getByRole("heading", { name: "The rule in short", exact: true })).toHaveCount(0);
+      await expect(page.locator(".grammar-rule")).toHaveCount(0);
+      await expect(page.getByRole("heading", { name: "How it works", exact: true })).toBeVisible();
+      await noHorizontalScroll(page);
+    }
+    await page.reload();
+    await expect(grammarTab).toHaveAttribute("aria-current", "page");
+    await navigation.screenshot({ path: testInfo.outputPath(`grammar-selected-${width}.png`) });
+  }
+  await page.goto("/material/grammatik");
+  await expect(grammarTab).toHaveAttribute("aria-current", "page");
+  await page.goto("/");
+  await expect(grammarTab).not.toHaveAttribute("aria-current", "page");
+  await expect(navigation.getByRole("link", { name: "Today", exact: true })).toHaveAttribute("aria-current", "page");
+});
+
 test("grammar tables keep words readable on narrow screens", async ({ page }, testInfo) => {
   testInfo.setTimeout(120_000);
   await enterAsGuest(page);
@@ -244,6 +278,10 @@ test("grammar tables keep words readable on narrow screens", async ({ page }, te
     for (const route of routes) {
       await page.goto(route);
       await noHorizontalScroll(page);
+      if (route.startsWith("/grammatik/")) {
+        await expect(page.getByRole("heading", { name: "The rule in short", exact: true })).toHaveCount(0);
+        await expect(page.locator(".grammar-rule")).toHaveCount(0);
+      }
       const broken = await page.locator("table:not(.vocab-table)").evaluateAll((tables) => {
         const broken: string[] = [];
         for (const table of tables) {

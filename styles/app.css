@@ -244,8 +244,6 @@ main[id], section[id], h2[id], h3[id] { scroll-margin-top: 5rem; }
 .sync-panel { padding: 1rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .grammar-group { margin: 2rem 0 0; }
 .grammar-catalogue .lesson { grid-template-columns: minmax(0, 1fr); }
-.grammar-rule { border-left: 3px solid var(--teal); padding: 0.25rem 1rem; margin: 1.5rem 0; }
-.grammar-rule p { margin-bottom: 0; max-width: 44rem; overflow-wrap: anywhere; }
 .jump { margin: 0.75rem 0 0; font-size: 0.92rem; }
 .grammar-h2 { margin: 2.5rem 0 0.25rem; }
 
