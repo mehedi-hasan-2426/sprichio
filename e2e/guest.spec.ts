@@ -17,6 +17,78 @@ async function noHorizontalScroll(page: Page) {
   expect(overflow).toBeLessThanOrEqual(1);
 }
 
+test("guest sign-in control stays visible and stable while hovering", async ({ page }, testInfo) => {
+  await enterAsGuest(page);
+  const link = page.locator(".top").getByRole("link", { name: "Sign in", exact: true });
+  const mobile = testInfo.project.name === "mobile";
+  for (const appearance of ["light", "dark"]) {
+    await page.mouse.move(0, 0);
+    await page.evaluate((value) => { document.documentElement.dataset.appearance = value; }, appearance);
+    await expect(link).toBeVisible();
+    await noHorizontalScroll(page);
+    expect(await link.evaluate((element) => getComputedStyle(element).borderTopStyle)).toBe("solid");
+    expect(await link.evaluate((element) => getComputedStyle(element).textDecorationLine)).toBe("none");
+    const initial = await link.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+        color: style.color, background: style.backgroundColor, border: style.borderTopColor,
+        transform: style.transform, transition: style.transitionDuration, animation: style.animationName,
+      };
+    });
+    expect(initial.transition).toBe("0s");
+    expect(initial.animation).toBe("none");
+    expect(initial.transform).toBe("none");
+    expect(initial.height).toBeGreaterThanOrEqual(44);
+    for (const offset of mobile ? [] : [initial.height / 2, 1, initial.height - 1]) {
+      await page.mouse.move(initial.x + initial.width / 2, initial.y + offset);
+      const hovered = await link.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { background: style.backgroundColor, border: style.borderTopColor };
+      });
+      expect(await link.evaluate((element) => getComputedStyle(element).textDecorationLine)).toBe("none");
+      const frames = await link.evaluate((element) => new Promise<{ x: number; y: number; width: number; height: number; color: string; background: string; border: string; transform: string; hovered: boolean }[]>((resolve) => {
+        const frames: { x: number; y: number; width: number; height: number; color: string; background: string; border: string; transform: string; hovered: boolean }[] = [];
+        const sample = () => {
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          frames.push({
+            x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+            color: style.color, background: style.backgroundColor, border: style.borderTopColor,
+            transform: style.transform, hovered: element.matches(":hover"),
+          });
+          if (frames.length < 30) requestAnimationFrame(sample);
+          else resolve(frames);
+        };
+        requestAnimationFrame(sample);
+      }));
+      for (const frame of frames) {
+        expect(frame).toEqual({
+          x: initial.x, y: initial.y, width: initial.width, height: initial.height,
+          color: initial.color, background: hovered.background, border: hovered.border,
+          transform: "none", hovered: true,
+        });
+      }
+    }
+    await link.focus();
+    await expect(link).toBeFocused();
+    expect(await link.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe("none");
+    await page.locator(".account-actions").screenshot({ path: testInfo.outputPath(`guest-sign-in-${appearance}.png`) });
+  }
+  if (mobile) {
+    for (const width of [320, 393]) {
+      await page.setViewportSize({ width, height: 851 });
+      await expect(link).toBeVisible();
+      await noHorizontalScroll(page);
+      await page.locator(".top").screenshot({ path: testInfo.outputPath(`guest-header-${width}.png`) });
+    }
+  }
+  await link.click();
+  await expect(page).toHaveURL(/\/signin$/);
+  await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
+});
+
 test("sign-in page renders particles and fits the screen", async ({ page }) => {
   await page.goto("/signin");
   await expect(page).toHaveTitle("Sign in · Sprichio");
@@ -163,17 +235,44 @@ test("every grammar lesson fits the screen without sideways scrolling", async ({
 });
 
 test("topic conversation reveals lines, translates them and fits the screen", async ({ page }) => {
+  await page.addInitScript(() => {
+    const calls: string[] = [];
+    Object.defineProperty(window, "conversationSpeechCalls", { value: calls });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        getVoices: () => [{ lang: "de-DE", name: "Anna" }, { lang: "de-DE", name: "Conrad" }],
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        cancel: () => undefined,
+        speak: () => calls.push("speak"),
+      },
+    });
+  });
   await enterAsGuest(page);
   await page.goto("/woche/2/gespraech");
   await expect(page.getByRole("heading", { name: "Im Café" })).toBeVisible();
   await expect(page.getByRole("img", { name: /At the café/ })).toBeVisible();
+  const audioButtons = page.locator(".talk-view").getByRole("button", { name: /^(Sound|Listen first)$|^Listen:/ });
+  await expect(audioButtons).toHaveCount(0);
+  await page.getByRole("button", { name: "Play conversation", exact: true }).click();
+  await expect(page.locator(".bubble")).toHaveCount(1);
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
   await page.getByRole("button", { name: "Next line" }).click();
   await expect(page.locator(".bubble").first()).toContainText("Was möchten Sie bestellen?");
   await page.getByRole("button", { name: "English" }).click();
   await expect(page.locator(".bubble-en").first()).toHaveText("Hello! What would you like to order?");
+  await noHorizontalScroll(page);
+  await page.screenshot({ path: test.info().outputPath("conversation-no-audio.png"), fullPage: true });
   await page.getByRole("button", { name: "Show all" }).click();
   await expect(page.locator(".bubble")).toHaveCount(11);
   await expect(page.getByText("Line 11 of 11")).toBeVisible();
+  await expect(audioButtons).toHaveCount(0);
+  await expect(page.getByText(/Audio needs a German voice|Text hidden\. Listen/)).toHaveCount(0);
   await page.getByRole("button", { name: "richtig" }).first().click();
   await noHorizontalScroll(page);
+  await page.getByRole("button", { name: "Play again", exact: true }).click();
+  await expect(page.locator(".bubble")).toHaveCount(1);
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  expect(await page.evaluate(() => Reflect.get(window, "conversationSpeechCalls"))).toEqual([]);
 });

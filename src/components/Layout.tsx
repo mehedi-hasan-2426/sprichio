@@ -97,7 +97,7 @@ export function Layout({ children, title }: { children: ReactNode; title?: strin
         <div className="account-actions">
           <ThemeToggle />
           {guest ? <span className="sync-status icon-only tip" data-tip="Guest: progress stays in this browser" role="status"><RoleIcon role="cloud" className="sync-icon" /><span className="sr-only">Guest: this browser only</span></span> : <SyncIndicator status={syncStatus} retry={() => { syncNow().catch(() => undefined); }} />}
-          {guest ? <Link className="button secondary sign-in-link" href="/signin">Sign in</Link> : null}
+          {guest ? <Link className="sign-in-link" href="/signin">Sign in</Link> : null}
           <button type="button" className="sign-out icon-only tip" data-tip={guest ? "Leave guest mode" : "Sign out"} aria-label={guest ? "Leave guest mode" : "Sign out"} onClick={leave} disabled={leaving}>
             <RoleIcon role="log-out" className="sync-icon" />
           </button>
