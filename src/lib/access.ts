@@ -14,7 +14,7 @@ export function sessionIsCurrent(signedInAt: unknown, now = Date.now()): boolean
 
 export function safeAuthRedirect(url: string, baseUrl: string): string {
   const base = new URL(baseUrl);
-  const fallback = new URL("/signin", base).href;
+  const fallback = new URL("/", base).href;
   try {
     if (url.startsWith("//") || url.includes("\\") || [...url].some((character) => character.charCodeAt(0) <= 32)) return fallback;
     const target = url.startsWith("/") ? new URL(url, base) : new URL(url);

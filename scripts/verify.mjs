@@ -104,13 +104,18 @@ export const checks = [
       const name = file.split(/[\\/]/).pop();
       if (name.startsWith("_") || ["signin.tsx", "404.tsx", "500.tsx"].includes(name)) continue;
       const body = readFileSync(file, "utf8");
+      if (file === join(ROOT, "pages", "index.tsx")) {
+        assert(!/loadCourse|useProgress|getServerSession|courseNav/.test(body), "public intro must not load course or learner data");
+        assert(body.includes('rel="canonical" href="https://sprichio.de/"'), "public intro canonical URL missing");
+        continue;
+      }
       assert(/export const getServerSideProps = protect\(/.test(body) || /export const getServerSideProps = protect</.test(body), "unprotected course route: " + file);
       assert(!/getStaticProps|getStaticPaths/.test(body), "static course route: " + file);
     }
     const protect = read("src", "server", "protect.ts");
     assert(/getServerSession/.test(protect) && /canAccess/.test(protect) && /private, no-store/.test(protect), "server authorization or private caching missing");
     assert(/isGuest\(context\.req\.cookies\)/.test(protect), "explicit guest course entry missing");
-    return "request-time account/guest checks; no static course pages";
+    return "public intro only; request-time account/guest checks on course pages";
   }],
   ["cloud progress is authenticated and versioned", () => {
     const route = read("pages", "api", "progress.ts");

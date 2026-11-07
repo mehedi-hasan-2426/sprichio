@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
     checks: ["pkce", "state", "nonce"],
   })],
   session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
-  pages: { signIn: "/signin", error: "/signin" },
+  pages: { signIn: "/", error: "/" },
   debug: false,
   logger: {
     error(code) { console.error("Authentication error:", code); },

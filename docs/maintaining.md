@@ -57,6 +57,13 @@ initial enrichment. Additional practice links are available inside grammar topic
 
 ## Security model
 
+The root introduction is public and contains only original sample content and
+public configuration flags, not sessions, learner progress or course data.
+Its canonical URL is `https://sprichio.de/`; the sitemap allowlist contains only
+that URL. Robots directives supplement, never replace, access control.
+The legacy `/signin` URL redirects to the introduction; guest and Google entry
+continue to the protected `/learn` dashboard.
+
 Server rendering with an account or explicit guest check on every course page and
 Next data request; no static course export or publicly bundled lesson data. Guest
 entry sets an HTTP-only, same-site course marker via a same-origin request. It is not

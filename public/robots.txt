@@ -1,0 +1,17 @@
+User-agent: *
+Disallow: /api/
+Disallow: /learn
+Disallow: /signin
+Disallow: /fortschritt
+Disallow: /woche/
+Disallow: /grammatik/
+Disallow: /material/
+Disallow: /plan
+Disallow: /karten
+Disallow: /artikel
+Disallow: /einstufung
+Disallow: /checkpoint/
+Disallow: /kurz
+Disallow: /info
+
+Sitemap: https://sprichio.de/sitemap.xml

@@ -9,12 +9,13 @@ import { isGuest } from "../lib/guest.ts";
 export function protect<Props extends object>(loader: (context: GetServerSidePropsContext) => GetServerSidePropsResult<Props> | Promise<GetServerSidePropsResult<Props>>): GetServerSideProps<Props> {
   return async (context) => {
     context.res.setHeader("Cache-Control", "private, no-store, max-age=0");
+    context.res.setHeader("X-Robots-Tag", "noindex, nofollow");
     context.res.setHeader("Vary", "Cookie");
     const session = authConfigured() ? await getServerSession(context.req, context.res, authOptions) as CourseSession | null : null;
     const authenticated = Boolean(session?.accountKey && canAccess(session.user?.email, true, process.env.ALLOWED_EMAILS));
     const guest = !authenticated && isGuest(context.req.cookies);
     if (!authenticated && !guest) {
-      return { redirect: { destination: "/signin", permanent: false } };
+      return { redirect: { destination: "/", permanent: false } };
     }
     const result = await loader(context);
     if (!("props" in result)) return result;

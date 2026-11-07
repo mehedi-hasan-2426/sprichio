@@ -6,7 +6,7 @@ export default function NotFound() {
     <Layout title="Not found">
       <h1>Page not found</h1>
       <p>
-        <Link href="/">Back to Today</Link>
+        <Link href="/learn">Back to Today</Link>
       </p>
     </Layout>
   );
