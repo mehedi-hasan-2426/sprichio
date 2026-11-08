@@ -35,7 +35,7 @@ can sign in.
 
 ## Run it locally
 
-You need Node.js 22.12 or newer.
+Use Node.js 22.13 or newer in the 22.x line, or Node.js 24 or newer.
 
 ```sh
 npm ci
