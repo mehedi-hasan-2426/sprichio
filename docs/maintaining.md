@@ -64,6 +64,13 @@ that URL. Robots directives supplement, never replace, access control.
 The legacy `/signin` URL redirects to the introduction; guest and Google entry
 continue to the protected `/learn` dashboard.
 
+The document head advertises the stable `/apple-touch-icon.png` as a square
+180-by-180 PNG favicon for search compatibility, alongside `/favicon.svg` for
+SVG-capable browsers. Keep both assets publicly crawlable. After changing icons,
+request indexing of `https://sprichio.de/` through Google Search Console's URL
+Inspection tool. Google may take days to weeks to refresh its favicon and does
+not guarantee display; see [Google's favicon guidance](https://developers.google.com/search/docs/appearance/favicon-in-search).
+
 Server rendering with an account or explicit guest check on every course page and
 Next data request; no static course export or publicly bundled lesson data. Guest
 entry sets an HTTP-only, same-site course marker via a same-origin request. It is not

@@ -165,9 +165,19 @@ test("guest practice survives returning to the public intro", async ({ page }) =
   await expect(page.locator("fieldset.item").first().locator(".feedback")).toHaveText(feedback ?? "");
 });
 
-test("Sprichio icons have transparent corners and visible pixels", async ({ page }) => {
+test("Sprichio icons have transparent corners and visible pixels", async ({ page, request }) => {
   await page.goto("/");
-  await expect(page.locator('link[rel="icon"]')).toHaveAttribute("href", "/favicon.svg");
+  await expect(page.locator('link[rel="icon"][type="image/png"]')).toHaveAttribute("href", "/apple-touch-icon.png");
+  await expect(page.locator('link[rel="icon"][type="image/png"]')).toHaveAttribute("sizes", "180x180");
+  await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute("href", "/favicon.svg");
+  await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute("sizes", "any");
+  const png = await request.get("/apple-touch-icon.png", { headers: { "User-Agent": "Googlebot-Image" } });
+  expect(png.status()).toBe(200);
+  expect(png.headers()["content-type"]).toContain("image/png");
+  expect(png.headers()["x-robots-tag"] ?? "").not.toMatch(/noindex|none/i);
+  const bytes = await png.body();
+  expect(bytes.readUInt32BE(16)).toBe(180);
+  expect(bytes.readUInt32BE(20)).toBe(180);
   await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "Sprichio");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", "https://sprichio.de/og-image.jpg");
   const icons = await page.evaluate(async () => {
