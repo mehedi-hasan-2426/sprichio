@@ -6,14 +6,15 @@ import { runInNewContext } from "node:vm";
 const source = readFileSync(new globalThis.URL("../public/appearance.js", import.meta.url), "utf8");
 const key = "sprungbrett.appearance";
 
-test("app branding uses Sprichio and its transparent SVG favicon", () => {
+test("app branding uses Sprichio with PNG and transparent SVG favicons", () => {
   for (const file of ["../src/components/Logo.tsx", "../pages/_app.tsx", "../pages/_document.tsx"]) {
     const text = readFileSync(new globalThis.URL(file, import.meta.url), "utf8");
     assert.match(text, /Sprichio/);
     assert.doesNotMatch(text, /Sprungbrett/);
   }
   const document = readFileSync(new globalThis.URL("../pages/_document.tsx", import.meta.url), "utf8");
-  assert.match(document, /type="image\/svg\+xml" href="\/favicon\.svg"/);
+  assert.match(document, /rel="icon" type="image\/png" sizes="180x180" href="\/apple-touch-icon\.png"/);
+  assert.match(document, /rel="icon" type="image\/svg\+xml" sizes="any" href="\/favicon\.svg"/);
   assert.match(document, /https:\/\/sprichio\.de\/og-image\.jpg/);
   const favicon = readFileSync(new globalThis.URL("../public/favicon.svg", import.meta.url), "utf8");
   assert.match(favicon, /<title>Sprichio<\/title>/);
